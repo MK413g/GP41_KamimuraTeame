@@ -1,0 +1,13 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{5D02CB13-473D-2CB7-8E98-D289CD1088A0}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "GP41_KamimuraTeame",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
