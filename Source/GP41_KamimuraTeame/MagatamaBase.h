@@ -46,6 +46,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 		E_MagatamaState state;
 
+	//ダメージ
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
+		float MaxDamage = 50.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
+		float MinDamage = 10.f;
+
 	//速度変数
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=RotationSpeed)
 		float maxBaseSpeed;//最大速度
@@ -102,6 +108,8 @@ public:
 		bool GetShotAngle(AActor* player)const;
 	UFUNCTION(BlueprintCallable)
 		void Update(AActor* playeractor, USceneComponent* com);
+	UFUNCTION(BlueprintCallable)
+		float GetDamage();
 
 	//関数
 	void AngleRotation(float len);

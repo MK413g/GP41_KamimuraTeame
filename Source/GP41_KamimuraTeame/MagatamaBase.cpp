@@ -40,6 +40,17 @@ void AMagatamaBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+float AMagatamaBase::GetDamage() 
+{
+	if (state != E_MagatamaState::Shot && state != E_MagatamaState::Rote) { return 0; }
+
+	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
+	float ra = roteangle / max;
+	float d = MinDamage * (1.f - speedRate) + MaxDamage * speedRate;
+	UE_LOG(LogTemp, Log, TEXT("Damage:%s"), *FString::SanitizeFloat(d));
+	return d;
+}
+
 void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 {
 	if (state!=E_MagatamaState::Wait) { return; }
