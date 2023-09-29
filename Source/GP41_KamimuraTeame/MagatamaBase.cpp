@@ -40,7 +40,7 @@ void AMagatamaBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-float AMagatamaBase::GetDamage() 
+float AMagatamaBase::GetDamage() const
 {
 	if (state != E_MagatamaState::Shot && state != E_MagatamaState::Rote) { return 0; }
 
