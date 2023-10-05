@@ -18,7 +18,7 @@ AMagatamaBase::AMagatamaBase()
 
 	AddStateMap(this, E_MagatamaState::Rote, &AMagatamaBase::RoteUpdate);
 }
-
+	
 // Called when the game starts or when spawned
 void AMagatamaBase::BeginPlay()
 {
@@ -40,15 +40,18 @@ void AMagatamaBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-float AMagatamaBase::GetDamage() const
+float AMagatamaBase::GetDamage(float enemyHp) const
 {
 	if (state != E_MagatamaState::Shot && state != E_MagatamaState::Rote) { return 0; }
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
-	float ra = roteangle / max;
 	float d = MinDamage * (1.f - speedRate) + MaxDamage * speedRate;
-	UE_LOG(LogTemp, Log, TEXT("Damage:%s"), *FString::SanitizeFloat(d));
-	return d;
+	//UE_LOG(LogTemp, Log, TEXT("Damage:%s"), *FString::SanitizeFloat(d));
+
+	enemyHp -= d;
+	if (enemyHp < 0)return 0;
+
+	return enemyHp;
 }
 
 void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)

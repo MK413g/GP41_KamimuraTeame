@@ -26,6 +26,11 @@ void AManagerSubLevel::BeginPlay()
 		levelstatus.Add(Key.ToString(), *RowData);
 		loadmanager->LoadSubLevel(levelstatus[Key.ToString()]);
 	}
+	Start();
+}
+
+void AManagerSubLevel::Start_Implementation()
+{
 }
 
 // Called every frame
@@ -37,14 +42,14 @@ void AManagerSubLevel::Tick(float DeltaTime)
 
 bool AManagerSubLevel::LoadSubLevel(FString name)
 {
-	if (!levelstatus.Contains(name))return false;
+	if (!levelstatus.Contains(name)||loadmanager == nullptr)return false;
 	loadmanager->LoadSubLevel(levelstatus[name]);
 	return true;
 }
 
 bool AManagerSubLevel::ShowSubLevel(FString name,bool active)
 {
-	if (!levelstatus.Contains(name))return false;
+	if (!levelstatus.Contains(name)|| loadmanager==nullptr)return false;
 	loadmanager->ShowLevel(levelstatus[name].level.ToSoftObjectPath().ToString(),active);
 	return true;
 }

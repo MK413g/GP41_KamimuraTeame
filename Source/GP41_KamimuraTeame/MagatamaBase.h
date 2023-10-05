@@ -109,7 +109,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void Update(AActor* playeractor, USceneComponent* com);
 	UFUNCTION(BlueprintCallable)
-		float GetDamage()const;
+		float GetDamage(float enemyHp)const;
 
 	//ä÷êî
 	void AngleRotation(float len);
