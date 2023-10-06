@@ -50,7 +50,7 @@ void AMagatamaBase::BeginPlay()
 	}
 
 	if (projectilemovement) {
-		projectilemovement->SetComponentTickEnabled(false);
+		projectilemovement->SetComponentTickEnabled(true);
 		projectilemovement->ProjectileGravityScale = ShotGravity;
 		projectilemovement->MaxSpeed = ShotMaxSpeed;
 	}
@@ -140,7 +140,7 @@ void AMagatamaBase::ResetWait()
 	if (shotboounscount < ShotBouns+1) { return; }
 
 	state = E_MagatamaState::Wait;
-	projectilemovement->SetComponentTickEnabled(false);
+	projectilemovement->SetComponentTickEnabled(true);
 }
 
 bool AMagatamaBase::GetShotAngle(AActor* player)const
@@ -193,6 +193,7 @@ void AMagatamaBase::RoteUpdate(AActor* playeractor, USceneComponent* com)
 	float ra = roteangle / max;
 	float d = distance * (1.f - ra) +( -dis) * ra;
 
+	SetActorLocation(center.GetLocation()+center.Rotator().Vector() * d,true);
 	SetActorLocation(center.GetLocation()+center.Rotator().Vector() * d);
 }
 
