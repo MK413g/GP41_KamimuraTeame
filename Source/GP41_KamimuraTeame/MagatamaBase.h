@@ -2,10 +2,39 @@
 
 #pragma once
 
+#include "Engine/DataTable.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include"PlayerBase.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MagatamaBase.generated.h"
+
+
+
+USTRUCT(BlueprintType)
+struct  FMagatamaState :public FTableRowBase
+{
+	GENERATED_USTRUCT_BODY()
+
+	//Damage
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxDamage;//shot max damage
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinDamage;//shot min damage 
+	//Rotation
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationMaxSpeed;//rotation max speed
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationMinSpeed;//rotetion min speed
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationAcceleration;//acceleration
+	//Shot
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotToAngle;//to~from
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotFromAngle;//to~from
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMaxSpeed;//
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMinSpeed;//
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotGravity;//
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)uint8 ShotBouns;//
+
+};
+
+
 
 UENUM(BlueprintType)
 enum class E_MagatamaState:uint8
@@ -46,56 +75,17 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 		E_MagatamaState state;
 
-	//ダメージ
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
-		float MaxDamage = 50.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
-		float MinDamage = 10.f;
-
-	//速度変数
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=RotationSpeed)
-		float maxBaseSpeed;//最大速度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RotationSpeed)
-		float minBaseSpeed;//最小速度
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = RotationSpeed)
+	UPROPERTY(BlueprintReadWrite, Category = RotationSpeed)
 		float speedRate;	//プレイヤーの最大速度(1)の時の最大角速度の割合
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RotationSpeed)
-		float initialVelocity;//初速度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RotationSpeed)
-		float speed;//加速度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RotationSpeed)
-		float RoteMaxDistance;//加速度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RotationSpeed)
-		float RoteMinDistance;//加速度
-
-	//発射変数
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shot)
-		float ShotMaxSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shot)
-		float ShotInitialMaxSpeed=0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shot)
-		float ShotInitialMinSpeed=0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shot)
-		float ShotGravity=0.5f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shot)
-		float ShotToAngle=30;//[to]~[from]
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shot)
-		float ShotFromAngle=30;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Shot)
-		uint8 ShotBouns = 1;
-
-	//ラグ変数
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Lag)
-		bool isLagLocation;//ラグの処理を行うか
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Lag)
-		float LocationLgSpeed;//速度
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Lag)
-		float LagMaxDistance;//最大ラグ距離
 
 	//コンポーネント
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	UProjectileMovementComponent* projectilemovement;
 
+	UPROPERTY(EditDefaultsOnly, Category = State)
+		UDataTable* PlayerStateDataTabel;
+	UPROPERTY(EditDefaultsOnly, Category = State)
+		UDataTable* MagatamaStateDataTabel;
 	//ブループリント関数
 	//設定関数
 	UFUNCTION(BlueprintCallable)
@@ -110,12 +100,17 @@ public:
 		void Update(AActor* playeractor, USceneComponent* com);
 	UFUNCTION(BlueprintCallable)
 		float GetDamage(float enemyHp)const;
+	UFUNCTION(BlueprintCallable)
+		void SetState(FMagatamaState stat, FPState pstate);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void Start();
+	virtual void Start_Implementation(){}
 
 	//関数
 	void AngleRotation(float len);
 	void RoteUpdate(AActor* playeractor, USceneComponent* com);
 	void AngleUpRotation(USceneComponent* com);
-	void LagUpdate();
 
 protected:
 	TMap<E_MagatamaState, FMagatamaDelegate> stateMap;
@@ -125,4 +120,24 @@ protected:
 	uint8 shotboounscount;
 	FTransform center;
 	float distance;
+
+	//stat
+	//ダメージ
+	float MaxDamage = 50.f;
+	float MinDamage = 10.f;
+	//速度変数
+	float maxBaseSpeed;//最大速度
+	float minBaseSpeed;//最小速度
+	float RoteMaxDistance;
+	float RoteMinDistance;
+	float Acceleration;//加速度
+	//発射変数
+	float ShotInitialMaxSpeed = 0;
+	float ShotInitialMinSpeed = 0;
+	float ShotGravity = 0.5f;
+	float ShotToAngle = 0;
+	float ShotFromAngle = 30;
+	float initialVelocity;//初速度
+	float ShotMaxSpeed;
+	uint8 ShotBouns = 1;
 };

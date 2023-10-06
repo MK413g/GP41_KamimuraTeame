@@ -30,15 +30,57 @@ void AMagatamaBase::BeginPlay()
 		projectilemovement->MaxSpeed = ShotMaxSpeed;
 	}
 
-	//ƒ‰ƒO•Ï”‰Šú‰»
-	LocationLgSpeed = 10.f;
+	initialVelocity = 1.0f;
+	ShotMaxSpeed = 10000.0;
+
+	if (PlayerStateDataTabel != nullptr || MagatamaStateDataTabel != nullptr) {
+
+		FPState* PST = nullptr;
+		for (FName Key : (*PlayerStateDataTabel).GetRowNames())
+		{
+			// î•ñ‚Ì•Û‘¶
+			PST = PlayerStateDataTabel->FindRow<FPState>(Key, FString());
+		}
+
+		FMagatamaState* MST = nullptr;
+		for (FName Key : (*MagatamaStateDataTabel).GetRowNames())
+		{
+			// î•ñ‚Ì•Û‘¶
+			MST = MagatamaStateDataTabel->FindRow<FMagatamaState>(Key, FString());
+		}
+
+		if (PST != nullptr || MST != nullptr) {
+			SetState(*MST, *PST);
+		}
+	}
+	Start();
 }
 
+void AMagatamaBase::SetState(FMagatamaState stat, FPState pstate)
+{
+	RoteMaxDistance = pstate.MaxRadius;
+	RoteMinDistance = pstate.MinRadius;
+
+	MaxDamage = stat.MaxDamage;
+	MinDamage = stat.MinDamage;
+	maxBaseSpeed = stat.RotationMaxSpeed;
+	minBaseSpeed = stat.RotationMinSpeed;
+
+	Acceleration = stat.RotationAcceleration;
+
+	ShotInitialMaxSpeed = stat.ShotInitialMaxSpeed;
+	ShotInitialMinSpeed = stat.ShotInitialMinSpeed;
+	ShotGravity = stat.ShotGravity;
+	ShotToAngle = stat.ShotToAngle;
+	ShotFromAngle = stat.ShotFromAngle;
+	ShotBouns = stat.ShotBouns;
+}
 // Called every frame
 void AMagatamaBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
 
 float AMagatamaBase::GetDamage(float enemyHp) const
 {
@@ -115,7 +157,7 @@ bool AMagatamaBase::GetShotAngle(AActor* player)const
 		angle *= -1;
 		angle+=360;
 	}
-	UE_LOG(LogTemp, Log, TEXT("angle%s"), *FString::SanitizeFloat(angle));
+	//UE_LOG(LogTemp, Log, TEXT("angle%s"), *FString::SanitizeFloat(angle));
 
 	if (ShotToAngle > ShotFromAngle) {
 		return ShotToAngle<angle || angle<ShotFromAngle;
@@ -152,16 +194,9 @@ void AMagatamaBase::RoteUpdate(AActor* playeractor, USceneComponent* com)
 	SetActorLocation(center.GetLocation()+center.Rotator().Vector() * d);
 }
 
-void AMagatamaBase::LagUpdate()
-{
-	if (isLagLocation) {
-
-	}
-}
-
 void AMagatamaBase::AngleUpRotation(USceneComponent* com)
 {
-	pichangle -= roteangle/10.0f;
+	pichangle -= roteangle/100.0f;
 	if (pichangle < 0) {
 		pichangle = 0;
 	}
@@ -178,7 +213,7 @@ void AMagatamaBase::AngleRotation(float len)
 	//zŽ²
 	float r = len;
 	//‘¬“x
-	float v = speed * timecout;
+	float v = Acceleration * timecout;
 	v += initialVelocity;
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;

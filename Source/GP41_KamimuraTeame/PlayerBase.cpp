@@ -53,6 +53,8 @@ void APlayerBase::InitSetState(FPState state)
 	StaminaRegeneration = state.StaminaRegeneration;
 	RotationSpeed = state.RotationSpeed;
 	Braking = state.JumpBraking;
+	MaxRadius = state.MaxRadius;
+	MinRadius = state.MaxRadius;
 }
 
 bool APlayerBase::StaminaRegene(float axis)
@@ -74,13 +76,14 @@ void APlayerBase::CheckVariable(float max, float& variable)
 
 float APlayerBase::GetRange(float rate)const
 {
-	return MinRange * (1.f - rate) + MaxRange * rate;
+	return MinRadius * (1.f - rate) + MaxRadius * rate;
 }
 
-void APlayerBase::SetDamage(float damage) 
+void APlayerBase::SetDamage(float damage, FVector force, float power)
 {
 	Hp -= damage;
 	if (Hp < 0)Hp = 0;
+	SetNockBack(force, power);
 }
 
 void APlayerBase::SetNockBack(FVector force, float power)

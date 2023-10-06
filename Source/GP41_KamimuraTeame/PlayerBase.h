@@ -18,7 +18,8 @@ struct  FPState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float Stamina;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationSpeed;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float JumpBraking;
-
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxRadius;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinRadius;
 };
 
 UCLASS()
@@ -42,27 +43,27 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float HpMax;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = State)
 		float Hp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = State)
+	UPROPERTY(VisibleInstanceOnly,BlueprintReadWrite, Category = State)
 		float Stamina;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float StaminaMax;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float StaminaRegeneration;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
+	UPROPERTY(BlueprintReadWrite, Category = State)
 		float RotationSpeed;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float Braking;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
-		float MaxRange;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
-		float MinRange;
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		float MaxRadius;
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		float MinRadius;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
 		UDataTable* StateDataTabel;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
 		FString LoadDataName;
 
 	UFUNCTION(BlueprintCallable)
@@ -74,7 +75,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		float GetRange(float rate)const;
 	UFUNCTION(BlueprintCallable)
-		void SetDamage(float damage);
+		void SetDamage(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
 	UFUNCTION(BlueprintCallable)
 		void SetNockBack(FVector force,float power);
 	UFUNCTION(BlueprintCallable)
