@@ -24,11 +24,6 @@ void AMagatamaBase::BeginPlay()
 {
 	Super::BeginPlay();
 	EnableInput(GetWorld()->GetFirstPlayerController());
-	if (projectilemovement) {
-		projectilemovement->SetComponentTickEnabled(false);
-		projectilemovement->ProjectileGravityScale = ShotGravity;
-		projectilemovement->MaxSpeed = ShotMaxSpeed;
-	}
 
 	initialVelocity = 1.0f;
 	ShotMaxSpeed = 10000.0;
@@ -53,6 +48,13 @@ void AMagatamaBase::BeginPlay()
 			SetState(*MST, *PST);
 		}
 	}
+
+	if (projectilemovement) {
+		projectilemovement->SetComponentTickEnabled(false);
+		projectilemovement->ProjectileGravityScale = ShotGravity;
+		projectilemovement->MaxSpeed = ShotMaxSpeed;
+	}
+
 	Start();
 }
 
