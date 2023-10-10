@@ -6,6 +6,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMagatamaBase::AMagatamaBase()
@@ -50,7 +51,7 @@ void AMagatamaBase::BeginPlay()
 	}
 
 	if (projectilemovement) {
-		projectilemovement->SetComponentTickEnabled(true);
+		projectilemovement->SetComponentTickEnabled(false);
 		projectilemovement->ProjectileGravityScale = ShotGravity;
 		projectilemovement->MaxSpeed = ShotMaxSpeed;
 	}
@@ -101,6 +102,14 @@ float AMagatamaBase::GetDamage(float enemyHp) const
 void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 {
 	if (state!=E_MagatamaState::Wait) { return; }
+	APawn* p = UGameplayStatics::GetPlayerPawn(this->GetWorld(), 0);
+	if (p != nullptr) {
+		APlayerBase* base = Cast<APlayerBase>(p);
+		if (base != nullptr){
+			base->MagatamaNum++;
+			base->AddMagatama(this);
+		}
+	}
 
 	FVector pos=com->GetComponentLocation();
 	center.SetLocation(PlayerPos);
@@ -118,7 +127,7 @@ void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 
 }
 
-void AMagatamaBase::SetupShot(USceneComponent* com, FVector targetvec)
+void AMagatamaBase::SetupShot(FVector targetvec)
 {
 	if (state != E_MagatamaState::Rote) { return; }
 
@@ -131,6 +140,15 @@ void AMagatamaBase::SetupShot(USceneComponent* com, FVector targetvec)
 	projectilemovement->InitialSpeed = shotspeed;
 	projectilemovement->Velocity = targetvec * shotspeed;
 	shotboounscount = 0;
+
+	APawn* p = UGameplayStatics::GetPlayerPawn(this->GetWorld(), 0);
+	if (p != nullptr) {
+		APlayerBase* base = Cast<APlayerBase>(p);
+		if (base != nullptr) {
+			base->MagatamaNum--;
+			base->DeleteMagatama(this);
+		}
+	}
 }
 
 void AMagatamaBase::ResetWait()
@@ -140,12 +158,16 @@ void AMagatamaBase::ResetWait()
 	if (shotboounscount < ShotBouns+1) { return; }
 
 	state = E_MagatamaState::Wait;
-	projectilemovement->SetComponentTickEnabled(true);
+	projectilemovement->SetComponentTickEnabled(false);
 }
 
 bool AMagatamaBase::GetShotAngle(AActor* player)const
 {
+	if (state != E_MagatamaState::Rote) { return false; }
 	if (player == nullptr) { return false; }
+	APlayerBase* base = Cast<APlayerBase>(player);
+	if (base == nullptr) { return false; }
+	if (!base->ShotMagatama) { return false; }
 
 	FVector playervec = player->GetActorForwardVector();
 	playervec.Normalize();
@@ -160,15 +182,17 @@ bool AMagatamaBase::GetShotAngle(AActor* player)const
 		angle+=360;
 	}
 	//UE_LOG(LogTemp, Log, TEXT("angle%s"), *FString::SanitizeFloat(angle));
-
+	bool ret = false;
 	if (ShotToAngle > ShotFromAngle) {
-		return ShotToAngle<angle || angle<ShotFromAngle;
+		ret = ShotToAngle < angle || angle < ShotFromAngle;
 	}
 	else {
-		return angle > ShotToAngle && ShotFromAngle > angle;
+		ret = angle > ShotToAngle && ShotFromAngle > angle;
 	}
 
-	return true;
+	if (ret) { base->ShotMagatama = false; }
+
+	return ret;
 }
 
 
@@ -192,9 +216,8 @@ void AMagatamaBase::RoteUpdate(AActor* playeractor, USceneComponent* com)
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
 	float ra = roteangle / max;
 	float d = distance * (1.f - ra) +( -dis) * ra;
-
-	SetActorLocation(center.GetLocation()+center.Rotator().Vector() * d,true);
-	SetActorLocation(center.GetLocation()+center.Rotator().Vector() * d);
+	SetActorLocation(center.GetLocation() + center.Rotator().Vector() * d, true);
+	SetActorLocation(center.GetLocation() + center.Rotator().Vector() * d);
 }
 
 void AMagatamaBase::AngleUpRotation(USceneComponent* com)

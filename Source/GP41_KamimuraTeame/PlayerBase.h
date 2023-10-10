@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerBase.generated.h"
 
+class AMagatamaBase;
 
 USTRUCT(BlueprintType)
 struct  FPState :public FTableRowBase
@@ -21,7 +22,6 @@ struct  FPState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxRadius;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinRadius;
 };
-
 UCLASS()
 class GP41_KAMIMURATEAME_API APlayerBase : public ACharacter
 {
@@ -59,7 +59,14 @@ public:
 		float MaxRadius;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float MinRadius;
-
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		uint8 MagatamaNum;
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		bool ShotMagatama = true;
+	
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		bool GameOverFlg = false;
+	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
 		UDataTable* StateDataTabel;
@@ -80,7 +87,11 @@ public:
 		void SetNockBack(FVector force,float power);
 	UFUNCTION(BlueprintCallable)
 		void NockBackUpdate();
+
+	void AddMagatama(AMagatamaBase* magatama);
+	void DeleteMagatama(AMagatamaBase* matagata);
 private:
 	float NockbackPower;
 	FVector NockBackForce;
+	TArray<AMagatamaBase*> hasMagatama;
 };

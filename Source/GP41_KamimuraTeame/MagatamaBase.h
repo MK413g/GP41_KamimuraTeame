@@ -91,7 +91,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetupPlayerUse(FVector PlayerPos,USceneComponent* com);
 	UFUNCTION(BlueprintCallable)
-		void SetupShot(USceneComponent* com,FVector targetvec);
+		void SetupShot(FVector targetvec);
 	UFUNCTION(BlueprintCallable)
 		void ResetWait();
 	UFUNCTION(BlueprintCallable)

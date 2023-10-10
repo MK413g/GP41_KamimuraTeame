@@ -2,6 +2,7 @@
 
 
 #include "PlayerBase.h"
+#include"MagatamaBase.h"
 
 // Sets default values
 APlayerBase::APlayerBase()
@@ -84,6 +85,10 @@ void APlayerBase::SetDamage(float damage, FVector force, float power)
 	Hp -= damage;
 	if (Hp < 0)Hp = 0;
 	SetNockBack(force, power);
+
+	if (Hp <= 0) {
+		GameOverFlg = true;
+	}
 }
 
 void APlayerBase::SetNockBack(FVector force, float power)
@@ -101,4 +106,15 @@ void APlayerBase::NockBackUpdate()
 	playerpos += NockBackForce * p;
 	SetActorLocation(playerpos);
 
+}
+
+void APlayerBase::AddMagatama(AMagatamaBase* magatama) {
+	hasMagatama.Add(magatama);
+}
+void APlayerBase::DeleteMagatama(AMagatamaBase* magatama) {
+
+	int32 index;
+	if (hasMagatama.Find(magatama,index)) {
+		hasMagatama.Remove(magatama);
+	}
 }
