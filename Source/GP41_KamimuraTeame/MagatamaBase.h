@@ -153,4 +153,5 @@ protected:
 
 	//Playreポインター
 	APlayerBase* base=nullptr;
+	float playerheight=0;
 };

@@ -55,7 +55,7 @@ void APlayerBase::InitSetState(FPState state)
 	RotationSpeed = state.RotationSpeed;
 	Braking = state.JumpBraking;
 	MaxRadius = state.MaxRadius;
-	MinRadius = state.MaxRadius;
+	MinRadius = state.MinRadius;
 }
 
 bool APlayerBase::StaminaRegene(float axis)

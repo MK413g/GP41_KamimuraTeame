@@ -32,9 +32,10 @@ void AMagatamaBase::BeginPlay()
 		APlayerBase* pl = Cast<APlayerBase>(p);
 		if (pl) {
 			base = pl;
+			playerheight = pl->GetActorLocation().Z * 2.0f;
 		}
 	}
-	initialVelocity = 1.0f;
+	initialVelocity = 0.0f;
 	ShotMaxSpeed = 10000.0;
 
 	if (PlayerStateDataTabel || MagatamaStateDataTabel ) {
@@ -90,6 +91,9 @@ void AMagatamaBase::SetState(FMagatamaState stat, FPState pstate)
 void AMagatamaBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (playerheight<GetActorLocation().Z) {
+		projectilemovement->ProjectileGravityScale = 2.f;
+	}
 }
 
 
@@ -185,6 +189,7 @@ void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 	com->SetWorldLocation(pos);
 	state = E_MagatamaState::Rote;
 	timecout = 0;
+	projectilemovement->ProjectileGravityScale = ShotGravity;
 
 	//‹——£‚ð•Û‘¶
 	distance = (PlayerPos - pos).Size();
