@@ -220,7 +220,8 @@ void AMagatamaBase::ResetWait()
 {
 	if (state != E_MagatamaState::Shot&&state!=E_MagatamaState::Drop) { return; }
 	shotboounscount++;
-	if (shotboounscount < ShotBouns+1) { return; }
+	if (shotboounscount < ShotBouns + 1 ) { return; }
+	if (playerheight < GetActorLocation().Z) { return; }
 
 	state = E_MagatamaState::Wait;
 	projectilemovement->SetComponentTickEnabled(false);
