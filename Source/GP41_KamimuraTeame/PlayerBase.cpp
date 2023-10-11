@@ -89,6 +89,17 @@ void APlayerBase::SetDamage(float damage, FVector force, float power)
 	if (Hp <= 0) {
 		GameOverFlg = true;
 	}
+
+	//Œù‹Ê‚Ìƒhƒƒbƒv(MaxHP‚Ì5•ª‚Ì1‚Å1‚Â—Ž‚¿‚é)
+	int drop = damage /(HpMax / 5.f);
+	if (drop >= MagatamaNum) {
+		drop = MagatamaNum;
+	}
+	for (int i = 0; i < drop; i++) {
+		hasMagatama[0]->SetupDrop();
+		hasMagatama.RemoveAt(0);
+	}
+	MagatamaNum -= drop;
 }
 
 void APlayerBase::SetNockBack(FVector force, float power)
@@ -101,7 +112,7 @@ void APlayerBase::NockBackUpdate()
 {
 	if (NockbackPower < 10)return;
 	FVector playerpos = GetActorLocation();
-	float p = NockbackPower * 0.2;
+	float p = NockbackPower * 0.2f;
 	NockbackPower -= p;
 	playerpos += NockBackForce * p;
 	SetActorLocation(playerpos);

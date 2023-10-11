@@ -26,10 +26,18 @@ void AMagatamaBase::BeginPlay()
 	Super::BeginPlay();
 	EnableInput(GetWorld()->GetFirstPlayerController());
 
+	//Playerを取得しておく
+	APawn* p = UGameplayStatics::GetPlayerPawn(this->GetWorld(), 0);
+	if (p) {
+		APlayerBase* pl = Cast<APlayerBase>(p);
+		if (pl) {
+			base = pl;
+		}
+	}
 	initialVelocity = 1.0f;
 	ShotMaxSpeed = 10000.0;
 
-	if (PlayerStateDataTabel != nullptr || MagatamaStateDataTabel != nullptr) {
+	if (PlayerStateDataTabel || MagatamaStateDataTabel ) {
 
 		FPState* PST = nullptr;
 		for (FName Key : (*PlayerStateDataTabel).GetRowNames())
@@ -45,7 +53,7 @@ void AMagatamaBase::BeginPlay()
 			MST = MagatamaStateDataTabel->FindRow<FMagatamaState>(Key, FString());
 		}
 
-		if (PST != nullptr || MST != nullptr) {
+		if (PST || MST) {
 			SetState(*MST, *PST);
 		}
 	}
@@ -87,7 +95,16 @@ void AMagatamaBase::Tick(float DeltaTime)
 
 float AMagatamaBase::GetDamage(float enemyHp) const
 {
-	if (state != E_MagatamaState::Shot && state != E_MagatamaState::Rote) { return 0; }
+	if (state != E_MagatamaState::Shot&&state != E_MagatamaState::Rote) 
+	{
+		return enemyHp;
+	}
+
+	if (state == E_MagatamaState::Rote) {
+		if (speedRate < 1.0f) {
+			return enemyHp;
+		}
+	}
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
 	float d = MinDamage * (1.f - speedRate) + MaxDamage * speedRate;
@@ -99,16 +116,65 @@ float AMagatamaBase::GetDamage(float enemyHp) const
 	return enemyHp;
 }
 
+FVector AMagatamaBase::GetNockBackForce() const 
+{
+	if (state == E_MagatamaState::Rote || state == E_MagatamaState::Shot)
+	{
+		//ノックバック方向
+		FVector vec;
+		float shotspeed = MinKnockBackPower * (1.0f - speedRate) + MaxKnockBackPower * speedRate;
+		switch (state)
+		{
+		case E_MagatamaState::Rote:
+			if (base) {
+				FVector pos = base->GetActorLocation() - GetActorLocation();
+				//外積を求める
+				FVector cross = FVector::CrossProduct(pos, FVector::UpVector);
+				vec = cross * shotspeed;
+			}
+			break;
+
+		case E_MagatamaState::Shot:
+			vec = shotvec.GetSafeNormal() * shotspeed;
+			break;
+		default:
+			break;
+		}
+		return vec;
+	}
+
+	return FVector::ZeroVector;
+}
+
+void AMagatamaBase::SetupDrop() {
+	//プレイヤーとの接線を求め、現在の速度で物理運動をする
+	//プレイヤーとのベクトルを求める
+	if (base) {
+		FVector pos = base->GetActorLocation() - GetActorLocation();
+		//外積を求める
+		FVector cross = FVector::CrossProduct(pos, FVector::UpVector);
+
+		const float r = 5.f;
+		float shotspeed = ShotInitialMinSpeed / r * (1.0f - speedRate) + ShotInitialMaxSpeed / r * speedRate;
+
+		projectilemovement->InitialSpeed = shotspeed;
+		projectilemovement->Velocity = cross * shotspeed;
+	}
+
+	projectilemovement->SetComponentTickEnabled(true);
+	shotboounscount = 0;
+	state = E_MagatamaState::Drop;
+	if (ShotBouns <= 1) {
+		shotboounscount = -1;
+	}
+}
+
 void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 {
 	if (state!=E_MagatamaState::Wait) { return; }
-	APawn* p = UGameplayStatics::GetPlayerPawn(this->GetWorld(), 0);
-	if (p != nullptr) {
-		APlayerBase* base = Cast<APlayerBase>(p);
-		if (base != nullptr){
-			base->MagatamaNum++;
-			base->AddMagatama(this);
-		}
+	if (base ) {
+		base->MagatamaNum++;
+		base->AddMagatama(this);
 	}
 
 	FVector pos=com->GetComponentLocation();
@@ -134,26 +200,20 @@ void AMagatamaBase::SetupShot(FVector targetvec)
 	state = E_MagatamaState::Shot;
 	projectilemovement->SetComponentTickEnabled(true);
 	float shotspeed= ShotInitialMinSpeed * (1.0f - speedRate) + ShotInitialMaxSpeed * speedRate;
-	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
-	float ra = roteangle / max;
-	float s = shotspeed * ra;
+	shotvec = targetvec * shotspeed;
 	projectilemovement->InitialSpeed = shotspeed;
-	projectilemovement->Velocity = targetvec * shotspeed;
+	projectilemovement->Velocity = shotvec;
 	shotboounscount = 0;
 
-	APawn* p = UGameplayStatics::GetPlayerPawn(this->GetWorld(), 0);
-	if (p != nullptr) {
-		APlayerBase* base = Cast<APlayerBase>(p);
-		if (base != nullptr) {
-			base->MagatamaNum--;
-			base->DeleteMagatama(this);
-		}
+	if (base) {
+		base->MagatamaNum--;
+		base->DeleteMagatama(this);
 	}
 }
 
 void AMagatamaBase::ResetWait()
 {
-	if (state != E_MagatamaState::Shot) { return; }
+	if (state != E_MagatamaState::Shot&&state!=E_MagatamaState::Drop) { return; }
 	shotboounscount++;
 	if (shotboounscount < ShotBouns+1) { return; }
 
@@ -164,9 +224,7 @@ void AMagatamaBase::ResetWait()
 bool AMagatamaBase::GetShotAngle(AActor* player)const
 {
 	if (state != E_MagatamaState::Rote) { return false; }
-	if (player == nullptr) { return false; }
-	APlayerBase* base = Cast<APlayerBase>(player);
-	if (base == nullptr) { return false; }
+	if (!base) { return false; }
 	if (!base->ShotMagatama) { return false; }
 
 	FVector playervec = player->GetActorForwardVector();

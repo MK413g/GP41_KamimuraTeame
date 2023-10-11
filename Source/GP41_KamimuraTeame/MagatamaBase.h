@@ -20,6 +20,10 @@ struct  FMagatamaState :public FTableRowBase
 	//Damage
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxDamage;//shot max damage
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinDamage;//shot min damage 
+
+//	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinKnockBackPower;
+//	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxKnockBackPower;
+
 	//Rotation
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationMaxSpeed;//rotation max speed
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationMinSpeed;//rotetion min speed
@@ -27,10 +31,10 @@ struct  FMagatamaState :public FTableRowBase
 	//Shot
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotToAngle;//to~from
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotFromAngle;//to~from
-	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMaxSpeed;//
-	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMinSpeed;//
-	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotGravity;//
-	UPROPERTY(EditAnyWhere, AdvancedDisplay)uint8 ShotBouns;//
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMaxSpeed;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMinSpeed;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotGravity;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)uint8 ShotBouns;
 
 };
 
@@ -42,6 +46,7 @@ enum class E_MagatamaState:uint8
 	Wait,
 	Rote,
 	Shot,
+	Drop,
 	Null
 };
 
@@ -101,6 +106,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		float GetDamage(float enemyHp)const;
 	UFUNCTION(BlueprintCallable)
+		FVector GetNockBackForce()const;
+	UFUNCTION(BlueprintCallable)
 		void SetState(FMagatamaState stat, FPState pstate);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -111,6 +118,7 @@ public:
 	void AngleRotation(float len);
 	void RoteUpdate(AActor* playeractor, USceneComponent* com);
 	void AngleUpRotation(USceneComponent* com);
+	void SetupDrop();
 
 protected:
 	TMap<E_MagatamaState, FMagatamaDelegate> stateMap;
@@ -120,11 +128,13 @@ protected:
 	uint8 shotboounscount;
 	FTransform center;
 	float distance;
-
+	FVector shotvec=FVector::ZeroVector;
 	//stat
 	//ダメージ
 	float MaxDamage = 50.f;
 	float MinDamage = 10.f;
+	float MinKnockBackPower = 100;
+	float MaxKnockBackPower = 300;
 	//速度変数
 	float maxBaseSpeed;//最大速度
 	float minBaseSpeed;//最小速度
@@ -140,4 +150,7 @@ protected:
 	float initialVelocity;//初速度
 	float ShotMaxSpeed;
 	uint8 ShotBouns = 1;
+
+	//Playreポインター
+	APlayerBase* base=nullptr;
 };
