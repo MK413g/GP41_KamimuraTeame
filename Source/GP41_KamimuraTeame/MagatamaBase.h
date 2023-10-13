@@ -94,7 +94,7 @@ public:
 	//ブループリント関数
 	//設定関数
 	UFUNCTION(BlueprintCallable)
-		void SetupPlayerUse(FVector PlayerPos,USceneComponent* com);
+		bool SetupPlayerUse(FVector PlayerPos,USceneComponent* com);
 	UFUNCTION(BlueprintCallable)
 		void SetupShot(FVector targetvec);
 	UFUNCTION(BlueprintCallable)

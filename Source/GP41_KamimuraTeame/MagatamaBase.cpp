@@ -173,9 +173,9 @@ void AMagatamaBase::SetupDrop() {
 	}
 }
 
-void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
+bool AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 {
-	if (state!=E_MagatamaState::Wait) { return; }
+	if (state!=E_MagatamaState::Wait) { return false; }
 	if (base ) {
 		base->MagatamaNum++;
 		base->AddMagatama(this);
@@ -195,7 +195,7 @@ void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 	distance = (PlayerPos - pos).Size();
 	distance = -distance;
 	SetActorLocation(center.GetLocation() + center.GetRotation().Rotator().Vector()* distance);
-
+	return true;
 }
 
 void AMagatamaBase::SetupShot(FVector targetvec)
