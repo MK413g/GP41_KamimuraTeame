@@ -52,5 +52,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 		bool ShowSubLevel(FString name,bool active);
 protected:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void Start();
+	virtual void Start_Implementation();
 	TMap<FString, FSubLevelState> levelstatus;
 };

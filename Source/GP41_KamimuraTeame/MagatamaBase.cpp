@@ -6,6 +6,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AMagatamaBase::AMagatamaBase()
@@ -18,42 +19,167 @@ AMagatamaBase::AMagatamaBase()
 
 	AddStateMap(this, E_MagatamaState::Rote, &AMagatamaBase::RoteUpdate);
 }
-
+	
 // Called when the game starts or when spawned
 void AMagatamaBase::BeginPlay()
 {
 	Super::BeginPlay();
 	EnableInput(GetWorld()->GetFirstPlayerController());
+
+	//Playerを取得しておく
+	APawn* p = UGameplayStatics::GetPlayerPawn(this->GetWorld(), 0);
+	if (p) {
+		APlayerBase* pl = Cast<APlayerBase>(p);
+		if (pl) {
+			base = pl;
+			playerheight = pl->GetActorLocation().Z * 2.0f;
+		}
+	}
+	initialVelocity = 0.0f;
+	ShotMaxSpeed = 10000.0;
+
+	if (PlayerStateDataTabel || MagatamaStateDataTabel ) {
+
+		FPState* PST = nullptr;
+		for (FName Key : (*PlayerStateDataTabel).GetRowNames())
+		{
+			// 情報の保存
+			PST = PlayerStateDataTabel->FindRow<FPState>(Key, FString());
+		}
+
+		FMagatamaState* MST = nullptr;
+		for (FName Key : (*MagatamaStateDataTabel).GetRowNames())
+		{
+			// 情報の保存
+			MST = MagatamaStateDataTabel->FindRow<FMagatamaState>(Key, FString());
+		}
+
+		if (PST || MST) {
+			SetState(*MST, *PST);
+		}
+	}
+
 	if (projectilemovement) {
 		projectilemovement->SetComponentTickEnabled(false);
 		projectilemovement->ProjectileGravityScale = ShotGravity;
 		projectilemovement->MaxSpeed = ShotMaxSpeed;
 	}
 
-	//ラグ変数初期化
-	LocationLgSpeed = 10.f;
+	Start();
 }
 
+void AMagatamaBase::SetState(FMagatamaState stat, FPState pstate)
+{
+	RoteMaxDistance = pstate.MaxRadius;
+	RoteMinDistance = pstate.MinRadius;
+
+	MaxDamage = stat.MaxDamage;
+	MinDamage = stat.MinDamage;
+	maxBaseSpeed = stat.RotationMaxSpeed;
+	minBaseSpeed = stat.RotationMinSpeed;
+
+	Acceleration = stat.RotationAcceleration;
+
+	ShotInitialMaxSpeed = stat.ShotInitialMaxSpeed;
+	ShotInitialMinSpeed = stat.ShotInitialMinSpeed;
+	ShotGravity = stat.ShotGravity;
+	ShotToAngle = stat.ShotToAngle;
+	ShotFromAngle = stat.ShotFromAngle;
+	ShotBouns = stat.ShotBouns;
+}
 // Called every frame
 void AMagatamaBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (playerheight<GetActorLocation().Z) {
+		projectilemovement->ProjectileGravityScale = 2.f;
+	}
 }
 
-float AMagatamaBase::GetDamage() const
+
+float AMagatamaBase::GetDamage(float enemyHp) const
 {
-	if (state != E_MagatamaState::Shot && state != E_MagatamaState::Rote) { return 0; }
+	if (state != E_MagatamaState::Shot&&state != E_MagatamaState::Rote) 
+	{
+		return enemyHp;
+	}
+
+	if (state == E_MagatamaState::Rote) {
+		if (speedRate < 1.0f) {
+			return enemyHp;
+		}
+	}
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
-	float ra = roteangle / max;
 	float d = MinDamage * (1.f - speedRate) + MaxDamage * speedRate;
-	UE_LOG(LogTemp, Log, TEXT("Damage:%s"), *FString::SanitizeFloat(d));
-	return d;
+	//UE_LOG(LogTemp, Log, TEXT("Damage:%s"), *FString::SanitizeFloat(d));
+
+	enemyHp -= d;
+	if (enemyHp < 0)return 0;
+
+	return enemyHp;
+}
+
+FVector AMagatamaBase::GetNockBackForce() const 
+{
+	if (state == E_MagatamaState::Rote || state == E_MagatamaState::Shot)
+	{
+		//ノックバック方向
+		FVector vec;
+		float shotspeed = MinKnockBackPower * (1.0f - speedRate) + MaxKnockBackPower * speedRate;
+		switch (state)
+		{
+		case E_MagatamaState::Rote:
+			if (base) {
+				FVector pos = base->GetActorLocation() - GetActorLocation();
+				//外積を求める
+				FVector cross = FVector::CrossProduct(pos, FVector::UpVector);
+				vec = cross * shotspeed;
+			}
+			break;
+
+		case E_MagatamaState::Shot:
+			vec = shotvec.GetSafeNormal() * shotspeed;
+			break;
+		default:
+			break;
+		}
+		return vec;
+	}
+
+	return FVector::ZeroVector;
+}
+
+void AMagatamaBase::SetupDrop() {
+	//プレイヤーとの接線を求め、現在の速度で物理運動をする
+	//プレイヤーとのベクトルを求める
+	if (base) {
+		FVector pos = base->GetActorLocation() - GetActorLocation();
+		//外積を求める
+		FVector cross = FVector::CrossProduct(pos, FVector::UpVector);
+
+		const float r = 5.f;
+		float shotspeed = ShotInitialMinSpeed / r * (1.0f - speedRate) + ShotInitialMaxSpeed / r * speedRate;
+
+		projectilemovement->InitialSpeed = shotspeed;
+		projectilemovement->Velocity = cross * shotspeed;
+	}
+
+	projectilemovement->SetComponentTickEnabled(true);
+	shotboounscount = 0;
+	state = E_MagatamaState::Drop;
+	if (ShotBouns <= 1) {
+		shotboounscount = -1;
+	}
 }
 
 void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 {
 	if (state!=E_MagatamaState::Wait) { return; }
+	if (base ) {
+		base->MagatamaNum++;
+		base->AddMagatama(this);
+	}
 
 	FVector pos=com->GetComponentLocation();
 	center.SetLocation(PlayerPos);
@@ -63,6 +189,7 @@ void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 	com->SetWorldLocation(pos);
 	state = E_MagatamaState::Rote;
 	timecout = 0;
+	projectilemovement->ProjectileGravityScale = ShotGravity;
 
 	//距離を保存
 	distance = (PlayerPos - pos).Size();
@@ -71,26 +198,30 @@ void AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 
 }
 
-void AMagatamaBase::SetupShot(USceneComponent* com, FVector targetvec)
+void AMagatamaBase::SetupShot(FVector targetvec)
 {
 	if (state != E_MagatamaState::Rote) { return; }
 
 	state = E_MagatamaState::Shot;
 	projectilemovement->SetComponentTickEnabled(true);
 	float shotspeed= ShotInitialMinSpeed * (1.0f - speedRate) + ShotInitialMaxSpeed * speedRate;
-	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
-	float ra = roteangle / max;
-	float s = shotspeed * ra;
+	shotvec = targetvec * shotspeed;
 	projectilemovement->InitialSpeed = shotspeed;
-	projectilemovement->Velocity = targetvec * shotspeed;
+	projectilemovement->Velocity = shotvec;
 	shotboounscount = 0;
+
+	if (base) {
+		base->MagatamaNum--;
+		base->DeleteMagatama(this);
+	}
 }
 
 void AMagatamaBase::ResetWait()
 {
-	if (state != E_MagatamaState::Shot) { return; }
+	if (state != E_MagatamaState::Shot&&state!=E_MagatamaState::Drop) { return; }
 	shotboounscount++;
-	if (shotboounscount < ShotBouns+1) { return; }
+	if (shotboounscount < ShotBouns + 1 ) { return; }
+	if (playerheight < GetActorLocation().Z) { return; }
 
 	state = E_MagatamaState::Wait;
 	projectilemovement->SetComponentTickEnabled(false);
@@ -98,7 +229,9 @@ void AMagatamaBase::ResetWait()
 
 bool AMagatamaBase::GetShotAngle(AActor* player)const
 {
-	if (player == nullptr) { return false; }
+	if (state != E_MagatamaState::Rote) { return false; }
+	if (!base) { return false; }
+	if (!base->ShotMagatama) { return false; }
 
 	FVector playervec = player->GetActorForwardVector();
 	playervec.Normalize();
@@ -112,16 +245,18 @@ bool AMagatamaBase::GetShotAngle(AActor* player)const
 		angle *= -1;
 		angle+=360;
 	}
-	UE_LOG(LogTemp, Log, TEXT("angle%s"), *FString::SanitizeFloat(angle));
-
+	//UE_LOG(LogTemp, Log, TEXT("angle%s"), *FString::SanitizeFloat(angle));
+	bool ret = false;
 	if (ShotToAngle > ShotFromAngle) {
-		return ShotToAngle<angle || angle<ShotFromAngle;
+		ret = ShotToAngle < angle || angle < ShotFromAngle;
 	}
 	else {
-		return angle > ShotToAngle && ShotFromAngle > angle;
+		ret = angle > ShotToAngle && ShotFromAngle > angle;
 	}
 
-	return true;
+	if (ret) { base->ShotMagatama = false; }
+
+	return ret;
 }
 
 
@@ -145,20 +280,13 @@ void AMagatamaBase::RoteUpdate(AActor* playeractor, USceneComponent* com)
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
 	float ra = roteangle / max;
 	float d = distance * (1.f - ra) +( -dis) * ra;
-
-	SetActorLocation(center.GetLocation()+center.Rotator().Vector() * d);
-}
-
-void AMagatamaBase::LagUpdate()
-{
-	if (isLagLocation) {
-
-	}
+	SetActorLocation(center.GetLocation() + center.Rotator().Vector() * d, true);
+	SetActorLocation(center.GetLocation() + center.Rotator().Vector() * d);
 }
 
 void AMagatamaBase::AngleUpRotation(USceneComponent* com)
 {
-	pichangle -= roteangle/10.0f;
+	pichangle -= roteangle/100.0f;
 	if (pichangle < 0) {
 		pichangle = 0;
 	}
@@ -175,7 +303,7 @@ void AMagatamaBase::AngleRotation(float len)
 	//z軸
 	float r = len;
 	//速度
-	float v = speed * timecout;
+	float v = Acceleration * timecout;
 	v += initialVelocity;
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
