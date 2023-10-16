@@ -98,7 +98,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetupShot(FVector targetvec);
 	UFUNCTION(BlueprintCallable)
-		void ResetWait();
+		bool ResetWait();
 	UFUNCTION(BlueprintCallable)
 		bool GetShotAngle(AActor* player)const;
 	UFUNCTION(BlueprintCallable)

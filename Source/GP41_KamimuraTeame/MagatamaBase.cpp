@@ -216,15 +216,16 @@ void AMagatamaBase::SetupShot(FVector targetvec)
 	}
 }
 
-void AMagatamaBase::ResetWait()
+bool AMagatamaBase::ResetWait()
 {
-	if (state != E_MagatamaState::Shot&&state!=E_MagatamaState::Drop) { return; }
+	if (state != E_MagatamaState::Shot&&state!=E_MagatamaState::Drop) { return false; }
 	shotboounscount++;
-	if (shotboounscount < ShotBouns + 1 ) { return; }
-	if (playerheight < GetActorLocation().Z) { return; }
+	if (shotboounscount < ShotBouns + 1 ) { return false; }
+	if (playerheight < GetActorLocation().Z) { return false; }
 
 	state = E_MagatamaState::Wait;
 	projectilemovement->SetComponentTickEnabled(false);
+	return true;
 }
 
 bool AMagatamaBase::GetShotAngle(AActor* player)const
