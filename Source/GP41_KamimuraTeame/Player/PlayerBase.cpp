@@ -2,7 +2,7 @@
 
 
 #include "PlayerBase.h"
-#include"MagatamaBase.h"
+#include"../Magatama/MagatamaBase.h"
 
 // Sets default values
 APlayerBase::APlayerBase()
@@ -80,26 +80,9 @@ float APlayerBase::GetRange(float rate)const
 	return MinRadius * (1.f - rate) + MaxRadius * rate;
 }
 
-void APlayerBase::SetDamage(float damage, FVector force, float power)
+void APlayerBase::SetDamage_Implementation(float damage, FVector force, float power)
 {
-	Hp -= damage;
-	if (Hp < 0)Hp = 0;
-	SetNockBack(force, power);
-
-	if (Hp <= 0) {
-		GameOverFlg = true;
-	}
-
-	//勾玉のドロップ(MaxHPの5分の1で1つ落ちる)
-	int drop = damage /(HpMax / 5.f);
-	if (drop >= MagatamaNum) {
-		drop = MagatamaNum;
-	}
-	for (int i = 0; i < drop; i++) {
-		hasMagatama[0]->SetupDrop();
-		hasMagatama.RemoveAt(0);
-	}
-	MagatamaNum -= drop;
+	Damage(damage, force, power);
 }
 
 void APlayerBase::SetNockBack(FVector force, float power)
@@ -121,6 +104,28 @@ void APlayerBase::NockBackUpdate()
 
 void APlayerBase::AddMagatama(AMagatamaBase* magatama) {
 	hasMagatama.Add(magatama);
+}
+
+void APlayerBase::Damage(float damage, FVector force, float power)
+{
+	Hp -= damage;
+	if (Hp < 0)Hp = 0;
+	SetNockBack(force, power);
+
+	if (Hp <= 0) {
+		SetGameOver();
+	}
+
+	//勾玉のドロップ(MaxHPの5分の1で1つ落ちる)
+	int drop = damage / (HpMax / 5.f);
+	if (drop >= MagatamaNum) {
+		drop = MagatamaNum;
+	}
+	for (int i = 0; i < drop; i++) {
+		hasMagatama[0]->SetupDrop();
+		hasMagatama.RemoveAt(0);
+	}
+	MagatamaNum -= drop;
 }
 void APlayerBase::DeleteMagatama(AMagatamaBase* magatama) {
 
