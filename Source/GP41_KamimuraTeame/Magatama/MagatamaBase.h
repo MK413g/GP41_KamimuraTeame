@@ -4,7 +4,7 @@
 
 #include "Engine/DataTable.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include"PlayerBase.h"
+#include"../Player/PlayerBase.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -96,17 +96,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 		bool SetupPlayerUse(FVector PlayerPos,USceneComponent* com);
 	UFUNCTION(BlueprintCallable)
-		void SetupShot(FVector targetvec);
+		bool SetupShot(FVector targetvec);
 	UFUNCTION(BlueprintCallable)
 		void ResetWait();
 	UFUNCTION(BlueprintCallable)
 		bool GetShotAngle(AActor* player)const;
 	UFUNCTION(BlueprintCallable)
 		void Update(AActor* playeractor, USceneComponent* com);
-	UFUNCTION(BlueprintCallable)
-		float GetDamage(float enemyHp)const;
-	UFUNCTION(BlueprintCallable)
-		FVector GetNockBackForce()const;
+	UFUNCTION(BlueprintPure)
+		float GetDamage();
+	UFUNCTION(BlueprintPure)
+		FVector GetNockBackForce();
 	UFUNCTION(BlueprintCallable)
 		void SetState(FMagatamaState stat, FPState pstate);
 

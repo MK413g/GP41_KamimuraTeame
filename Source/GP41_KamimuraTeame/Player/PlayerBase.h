@@ -64,9 +64,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		bool ShotMagatama = true;
 	
-	UPROPERTY(BlueprintReadWrite, Category = State)
-		bool GameOverFlg = false;
-	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
 		UDataTable* StateDataTabel;
@@ -79,16 +76,22 @@ public:
 		bool StaminaRegene(float axis);
 	UFUNCTION(BlueprintCallable)
 		void CheckVariable(float max, float& variable);
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintPure)
 		float GetRange(float rate)const;
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable)
 		void SetDamage(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
+	virtual void SetDamage_Implementation(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
+
 	UFUNCTION(BlueprintCallable)
 		void SetNockBack(FVector force,float power);
 	UFUNCTION(BlueprintCallable)
 		void NockBackUpdate();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void SetGameOver();
+	virtual void SetGameOver_Implementation(){}
 
 	void AddMagatama(AMagatamaBase* magatama);
+	void Damage(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
 	void DeleteMagatama(AMagatamaBase* matagata);
 private:
 	float NockbackPower;

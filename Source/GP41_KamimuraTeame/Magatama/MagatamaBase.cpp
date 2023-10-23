@@ -97,30 +97,26 @@ void AMagatamaBase::Tick(float DeltaTime)
 }
 
 
-float AMagatamaBase::GetDamage(float enemyHp) const
+float AMagatamaBase::GetDamage()
 {
 	if (state != E_MagatamaState::Shot&&state != E_MagatamaState::Rote) 
 	{
-		return enemyHp;
+		return 0;
 	}
 
 	if (state == E_MagatamaState::Rote) {
 		if (speedRate < 1.0f) {
-			return enemyHp;
+			return 0;
 		}
 	}
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
 	float d = MinDamage * (1.f - speedRate) + MaxDamage * speedRate;
 	//UE_LOG(LogTemp, Log, TEXT("Damage:%s"), *FString::SanitizeFloat(d));
-
-	enemyHp -= d;
-	if (enemyHp < 0)return 0;
-
-	return enemyHp;
+	return d;
 }
 
-FVector AMagatamaBase::GetNockBackForce() const 
+FVector AMagatamaBase::GetNockBackForce()  
 {
 	if (state == E_MagatamaState::Rote || state == E_MagatamaState::Shot)
 	{
@@ -198,9 +194,9 @@ bool AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 	return true;
 }
 
-void AMagatamaBase::SetupShot(FVector targetvec)
+bool AMagatamaBase::SetupShot(FVector targetvec)
 {
-	if (state != E_MagatamaState::Rote) { return; }
+	if (state != E_MagatamaState::Rote) { return false; }
 
 	state = E_MagatamaState::Shot;
 	projectilemovement->SetComponentTickEnabled(true);
@@ -214,6 +210,7 @@ void AMagatamaBase::SetupShot(FVector targetvec)
 		base->MagatamaNum--;
 		base->DeleteMagatama(this);
 	}
+	return true;
 }
 
 void AMagatamaBase::ResetWait()
