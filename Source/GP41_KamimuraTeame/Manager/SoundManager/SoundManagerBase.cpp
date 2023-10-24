@@ -116,3 +116,33 @@ void ASoundManagerBase::PlaySoundLocation(USoundBase* sound, ESoundManagerType t
 
 	//}
 }
+
+float ASoundManagerBase::GetBGMVoluem()
+{
+	return VolumeBGMRate;
+}
+
+float ASoundManagerBase::GetSEVoluem()
+{
+	return VolumeSERate;
+}
+
+float ASoundManagerBase::GetALLVoluem()
+{
+	return VolumeAllRate;
+}
+
+void ASoundManagerBase::SetBGMVoluem(float volume)
+{
+	VolumeBGMRate = volume;
+}
+
+void ASoundManagerBase::SetSEVoluem(float volume)
+{
+	VolumeSERate = volume;
+}
+
+void ASoundManagerBase::SetALLVoluem(float volume)
+{
+	VolumeAllRate = volume;
+}
