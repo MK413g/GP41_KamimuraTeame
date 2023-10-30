@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include"Sound/SoundClass.h"
+#include "Sound/SoundMix.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SoundManagerBase.generated.h"
@@ -48,9 +51,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 		static void SetALLVoluem(float volume = 0);
 
+//private:
+	static bool CheckUClass(ESoundManagerType type);
+	static bool CheckUClass();
 
-	// Called every frame
-	
+	static USoundMix* mix;
+	static USoundClass* baseclass;
+	static USoundClass* bgmclass;
+	static USoundClass* seclass;
+
+
+
 	static float VolumeAllRate;
 	static float VolumeBGMRate;
 	static float VolumeSERate;

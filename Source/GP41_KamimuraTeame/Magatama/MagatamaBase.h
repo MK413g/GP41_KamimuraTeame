@@ -35,7 +35,6 @@ struct  FMagatamaState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMinSpeed;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotGravity;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)uint8 ShotBouns;
-
 };
 
 
@@ -98,7 +97,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		bool SetupShot(FVector targetvec);
 	UFUNCTION(BlueprintCallable)
-		void ResetWait();
+		bool ResetWait();
 	UFUNCTION(BlueprintCallable)
 		bool GetShotAngle(AActor* player)const;
 	UFUNCTION(BlueprintCallable)
