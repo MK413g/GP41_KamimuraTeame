@@ -115,6 +115,13 @@ void APlayerBase::SetStun_Implementation(float time)
 	stunTime = time;
 	stunCuntTime = 0;
 	stunflg = true;
+
+	//Œù‹Ê‚ğ‚·‚×‚Äƒhƒƒbƒv‚·‚é
+	for (int i = 0; i < MagatamaNum; i++) {
+		hasMagatama[0]->SetupDrop();
+		hasMagatama.RemoveAt(0);
+	}
+	MagatamaNum = 0;
 }
 
 void APlayerBase::StunRecovery_Implementation()
