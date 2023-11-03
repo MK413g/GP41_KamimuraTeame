@@ -165,6 +165,13 @@ bool APlayerBase::CheckMoveRight(float inputvalue, float speed,float& reinput)
 	return true;
 }
 
+void APlayerBase::HasMagatamaHidden()
+{
+	for (int i = 0; i < MagatamaNum; i++) {
+		hasMagatama[i]->SetHidden(true);
+	}
+}
+
 void APlayerBase::AddMagatama(AMagatamaBase* magatama) {
 	hasMagatama.Add(magatama);
 }

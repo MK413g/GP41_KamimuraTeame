@@ -124,7 +124,8 @@ public:
 		bool CheckMoveForward(float inputvalue,float speed,float& reinput);
 	UFUNCTION(BlueprintCallable)
 		bool CheckMoveRight(float inputvalue,float speed,float &reinput);
-
+	UFUNCTION(BlueprintCallable)
+		void HasMagatamaHidden();
 
 	void AddMagatama(AMagatamaBase* magatama);
 	void Damage(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
