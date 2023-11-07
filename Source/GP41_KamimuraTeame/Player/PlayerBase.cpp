@@ -17,18 +17,6 @@ void APlayerBase::BeginPlay()
 	Super::BeginPlay();
 
 
-	if (StateDataTabel == nullptr)return;
-
-	// データテーブルの読み込み
-	for (FName Key : (*StateDataTabel).GetRowNames())
-	{
-		if (Key.ToString() == LoadDataName) {
-			// 情報の保存
-			FPState* RowData = StateDataTabel->FindRow<FPState>(Key, FString());
-			InitSetState(*RowData);
-		}
-	}
-
 	stunflg = false;
 	stunCuntTime = 0;
 }
@@ -64,6 +52,24 @@ void APlayerBase::InitSetState(FPState state)
 	JumpDownPower = state.JumpDownPower;
 	MoveChangeSpeed = state.MoveChangeSpeed;
 	SetInit(MoveSpeed,JumpPower,MoveBreaking,state.MoveBrakingFrictionFactor);
+}
+
+bool APlayerBase::SetDataTable()
+{
+	if (StateDataTabel == nullptr)return false;
+
+	// データテーブルの読み込み
+	for (FName Key : (*StateDataTabel).GetRowNames())
+	{
+		if (Key.ToString() == LoadDataName) {
+			// 情報の保存
+			FPState* RowData = StateDataTabel->FindRow<FPState>(Key, FString());
+			InitSetState(*RowData);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool APlayerBase::StaminaRegene(float axis)
@@ -106,7 +112,8 @@ void APlayerBase::NockBackUpdate()
 	float p = NockbackPower * 0.2f;
 	NockbackPower -= p;
 	playerpos += NockBackForce * p;
-	SetActorLocation(playerpos);
+	
+	SetActorLocation(playerpos,true);
 
 }
 

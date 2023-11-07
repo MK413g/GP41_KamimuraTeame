@@ -95,6 +95,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void InitSetState(FPState state);
 	UFUNCTION(BlueprintCallable)
+		bool SetDataTable();
+	UFUNCTION(BlueprintCallable)
 		bool StaminaRegene(float axis);
 	UFUNCTION(BlueprintCallable)
 		void CheckVariable(float max, float& variable);
