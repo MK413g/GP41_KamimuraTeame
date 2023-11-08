@@ -131,7 +131,7 @@ void ASoundManagerBase::SetBGMVoluem(float volume)
 void ASoundManagerBase::SetSEVoluem(float volume)
 {
 	if (VolumeSERate != volume) {
-		if (CheckUClass(ESoundManagerType::BGM)) {
+		if (CheckUClass(ESoundManagerType::SE)) {
 			UWorld* World = GEngine->GameViewport->GetWorld();
 			FAudioDevice* device = World->GetAudioDeviceRaw();
 			device->SetSoundMixClassOverride(mix, bgmclass, VolumeSERate, 1, 0, true);
