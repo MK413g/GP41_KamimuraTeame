@@ -213,8 +213,31 @@ bool AMagatamaBase::SetupShot(FVector targetvec)
 	return true;
 }
 
-bool AMagatamaBase::ResetWait()
+bool AMagatamaBase::ResetWait(bool enemyhit)
 {
+	if (enemyhit) {
+		if (state == E_MagatamaState::Rote && speedRate >= 1.f) {
+			if (base != nullptr) {
+				base->DeleteMagatama(this);
+			}
+			SetupDrop();
+			return true;
+		}
+
+		//if (state == E_MagatamaState::Rote) {
+		//	if (speedRate <= 0.5f) {
+		//		speedRate = 0.5f;
+		//	}
+
+		//	if (base!=nullptr) {
+		//		base->DeleteMagatama(this);
+		//	}
+		//	SetupDrop();
+		//	return true;
+		//}
+	}
+
+
 	if (state != E_MagatamaState::Shot&&state!=E_MagatamaState::Drop) { return false; }
 	shotboounscount++;
 	if (shotboounscount < ShotBouns + 1 ) { return false; }
