@@ -22,6 +22,7 @@ struct  FPState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float JumpPower;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float JumpDownPower;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveSpeed;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RunMoveSpeed;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveBraking;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveBrakingFrictionFactor;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveChangeSpeed;
@@ -76,6 +77,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float MoveSpeed;
 	UPROPERTY(BlueprintReadWrite, Category = State)
+		float MoveRunSpeed;
+	UPROPERTY(BlueprintReadWrite, Category = State)
 		float MoveBreaking;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float MoveChangeSpeed;
@@ -87,10 +90,15 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		bool stunflg;
 
+	UPROPERTY(BlueprintReadWrite)
+		bool lockonflg;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
 		UDataTable* StateDataTabel;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
 		FString LoadDataName;
+
+
 
 	UFUNCTION(BlueprintCallable)
 		void InitSetState(FPState state);
@@ -129,12 +137,33 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void HasMagatamaHidden();
 
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SettingStartRun();
+	void SettingStartRun_Implementation();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SettingEndRun();
+	void SettingEndRun_Implementation();
+
+	void LockOnEnemy();
+	
 	void AddMagatama(AMagatamaBase* magatama);
 	void Damage(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
 	void DeleteMagatama(AMagatamaBase* matagata);
-	void UpdateStun(float deltatime);
 
+	//TickçXêV
+	void UpdateStun(float deltatime);
+	void LockOnUpdate(float deltatime);
+	
 private:
+	bool GetEnemyActor(AActor** target);
+
+	FVector nowlockAngle;
+	FVector lockontargetAngle;
+	float lockonCount;
+	const float lockonTime = 0.1f;
+
+	bool runflg;
 	const float oldinputrate = 0.3f;
 	float oldinputforwardValue;
 	float oldinputrightValue;
