@@ -35,6 +35,7 @@ void APlayerBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	UpdateStun(DeltaTime);
 	LockOnUpdate(DeltaTime);
+	UpdateRun(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -61,6 +62,7 @@ void APlayerBase::InitSetState(FPState state)
 	JumpDownPower = state.JumpDownPower;
 	MoveChangeSpeed = state.MoveChangeSpeed;
 	MoveRunSpeed = state.RunMoveSpeed;
+	runstamina = 1;
 	SetInit(MoveSpeed,JumpPower,MoveBreaking,state.MoveBrakingFrictionFactor);
 }
 
@@ -86,7 +88,7 @@ bool APlayerBase::StaminaRegene(float axis)
 {
 	bool ret;
 	ret = axis > 0.1f && Stamina > 0.f;
-	if (axis < 0.1f) {
+	if (axis < 0.1f&&runrate.Size()<=0.01f) {
 		Stamina += FApp::GetDeltaTime() * StaminaRegeneration;
 
 		CheckVariable(StaminaMax, Stamina);
@@ -150,6 +152,11 @@ void APlayerBase::StunRecovery_Implementation()
 
 bool APlayerBase::CheckMoveForward(float inputvalue,float speed,float& reinput)
 {
+	if (runflg) {
+		runrate.Y = inputvalue;
+	}
+
+
 	if (fabsf(inputvalue) < 0.05f) {
 		return false;
 	}
@@ -168,6 +175,10 @@ bool APlayerBase::CheckMoveForward(float inputvalue,float speed,float& reinput)
 
 bool APlayerBase::CheckMoveRight(float inputvalue, float speed,float& reinput)
 {
+	if (runflg) {
+		runrate.X = inputvalue;
+	}
+
 	if (fabsf(inputvalue) < 0.05f) {
 		return false;
 	}
@@ -201,8 +212,7 @@ void APlayerBase::SettingStartRun_Implementation()
 void APlayerBase::SettingEndRun_Implementation()
 {
 	runflg = false;
-	GetControlRotation();
-	AddControllerYawInput(0);
+	runrate.X = runrate.Y = 0.f;
 }
 
 void APlayerBase::LockOnUpdate(float deltatime)
@@ -230,7 +240,29 @@ void APlayerBase::LockOnUpdate(float deltatime)
 	if (lockonCount >= lockonTime) {
 		lockonflg = false;
 		lockonCount = 0.0f;
+		
+		FRotator prote = this->GetActorRotation();
+		prote.Yaw = rote.Yaw;
+		//ƒvƒŒƒCƒ„[‚ÌŒü‚«‚ğ‡‚í‚¹‚é
+		SetActorRotation(prote);
 	}
+
+}
+
+void APlayerBase::UpdateRun(float deltatime)
+{
+	if (!runflg) {
+		return;
+	}
+
+	if (Stamina <= 0.f) {
+		Stamina = 0;
+		SettingEndRun();
+		runflg = true;
+		return;
+	}
+
+	Stamina -= deltatime * runstamina * runrate.Size();
 
 }
 

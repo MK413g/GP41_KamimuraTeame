@@ -27,6 +27,7 @@ struct  FPState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveBrakingFrictionFactor;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveChangeSpeed;
 	//UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveAcceleration;
+	//UPROPERTY(EditAnyWhere, AdvancedDisplay)float RunMoveStamina;
 
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxRadius;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinRadius;
@@ -154,7 +155,8 @@ public:
 	//TickçXêV
 	void UpdateStun(float deltatime);
 	void LockOnUpdate(float deltatime);
-	
+	void UpdateRun(float deltatime);
+
 private:
 	bool GetEnemyActor(AActor** target);
 
@@ -162,8 +164,11 @@ private:
 	FVector lockontargetAngle;
 	float lockonCount;
 	const float lockonTime = 0.1f;
-
+	
+	float runstamina;
+	FVector2D runrate;
 	bool runflg;
+
 	const float oldinputrate = 0.3f;
 	float oldinputforwardValue;
 	float oldinputrightValue;
