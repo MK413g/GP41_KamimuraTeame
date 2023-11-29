@@ -3,12 +3,14 @@
 
 #include "PlayerBase.h"
 #include"../Magatama/MagatamaBase.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayerBase::APlayerBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 }
 
 // Called when the game starts or when spawned
@@ -16,9 +18,15 @@ void APlayerBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	
 	stunflg = false;
 	stunCuntTime = 0;
+	runflg = false;
+	lockonflg = false;
+
+	//キーバインド
+	InputComponent->BindAction("Attention", EInputEvent::IE_Pressed, this, &APlayerBase::LockOnEnemy);
+	
 }
 
 // Called every frame
@@ -26,6 +34,8 @@ void APlayerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UpdateStun(DeltaTime);
+	LockOnUpdate(DeltaTime);
+	UpdateRun(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -51,6 +61,8 @@ void APlayerBase::InitSetState(FPState state)
 	MoveBreaking = state.MoveBraking;
 	JumpDownPower = state.JumpDownPower;
 	MoveChangeSpeed = state.MoveChangeSpeed;
+	MoveRunSpeed = state.RunMoveSpeed;
+	runstamina = 1;
 	SetInit(MoveSpeed,JumpPower,MoveBreaking,state.MoveBrakingFrictionFactor);
 }
 
@@ -76,7 +88,7 @@ bool APlayerBase::StaminaRegene(float axis)
 {
 	bool ret;
 	ret = axis > 0.1f && Stamina > 0.f;
-	if (axis < 0.1f) {
+	if (axis < 0.1f&&runrate.Size()<=0.01f) {
 		Stamina += FApp::GetDeltaTime() * StaminaRegeneration;
 
 		CheckVariable(StaminaMax, Stamina);
@@ -125,8 +137,10 @@ void APlayerBase::SetStun_Implementation(float time)
 
 	//勾玉をすべてドロップする
 	for (int i = 0; i < MagatamaNum; i++) {
-		hasMagatama[0]->SetupDrop();
-		hasMagatama.RemoveAt(0);
+		if (hasMagatama[0] != NULL) {
+			hasMagatama[0]->SetupDrop();
+		}	hasMagatama.RemoveAt(0);
+
 	}
 	MagatamaNum = 0;
 }
@@ -138,6 +152,11 @@ void APlayerBase::StunRecovery_Implementation()
 
 bool APlayerBase::CheckMoveForward(float inputvalue,float speed,float& reinput)
 {
+	if (runflg) {
+		runrate.Y = inputvalue;
+	}
+
+
 	if (fabsf(inputvalue) < 0.05f) {
 		return false;
 	}
@@ -156,6 +175,10 @@ bool APlayerBase::CheckMoveForward(float inputvalue,float speed,float& reinput)
 
 bool APlayerBase::CheckMoveRight(float inputvalue, float speed,float& reinput)
 {
+	if (runflg) {
+		runrate.X = inputvalue;
+	}
+
 	if (fabsf(inputvalue) < 0.05f) {
 		return false;
 	}
@@ -175,8 +198,125 @@ bool APlayerBase::CheckMoveRight(float inputvalue, float speed,float& reinput)
 void APlayerBase::HasMagatamaHidden()
 {
 	for (int i = 0; i < MagatamaNum; i++) {
-		hasMagatama[i]->SetHidden(true);
+		if (hasMagatama[i] != NULL) {
+			hasMagatama[i]->SetHidden(true);
+		}
 	}
+}
+
+void APlayerBase::SettingStartRun_Implementation()
+{
+	runflg = true;
+}
+
+void APlayerBase::SettingEndRun_Implementation()
+{
+	runflg = false;
+	runrate.X = runrate.Y = 0.f;
+}
+
+void APlayerBase::LockOnUpdate(float deltatime)
+{
+	if (!lockonflg) {
+		return;
+	}
+
+	//カメラを回転させる
+	FRotator rote;
+//	rote.Pitch=lockontargetAngle
+	
+	lockonCount += deltatime;
+	float rate = 1.f / lockonTime * lockonCount;
+	if (rate >= 1.0f) {
+		rate = 1.0f;
+	}
+	rote.Pitch = nowlockAngle.X * (1.f - rate) + lockontargetAngle.X*rate;
+	rote.Yaw = nowlockAngle.Y * (1.f - rate) + lockontargetAngle.Y*rate;
+	rote.Roll = nowlockAngle.Z * (1.f - rate) + lockontargetAngle.Z*rate;
+
+	APlayerController* const PC = CastChecked<APlayerController>(GetController());
+	PC->ClientSetRotation(rote);
+
+	if (lockonCount >= lockonTime) {
+		lockonflg = false;
+		lockonCount = 0.0f;
+		
+		FRotator prote = this->GetActorRotation();
+		prote.Yaw = rote.Yaw;
+		//プレイヤーの向きを合わせる
+		SetActorRotation(prote);
+	}
+
+}
+
+void APlayerBase::UpdateRun(float deltatime)
+{
+	if (!runflg) {
+		return;
+	}
+
+	if (Stamina <= 0.f) {
+		Stamina = 0;
+		SettingEndRun();
+		runflg = true;
+		return;
+	}
+
+	Stamina -= deltatime * runstamina * runrate.Size();
+
+}
+
+void APlayerBase::LockOnEnemy()
+{
+	if (lockonflg) {
+		return;
+	}
+
+	AActor* target=nullptr;
+	if (!GetEnemyActor(&target)) 
+	{//エラー 
+		return;
+	}
+	FRotator rote = GetControlRotation();
+	nowlockAngle.X = rote.Pitch < 0.0f ? rote.Pitch + 360.0f : rote.Pitch;
+	nowlockAngle.Y = rote.Yaw < 0.0f ? rote.Yaw + 360.0f : rote.Yaw;
+	nowlockAngle.Z = rote.Roll < 0.0f ? rote.Roll + 360.0f : rote.Roll;
+
+	FVector targepos = target->GetActorLocation();
+	targepos.Z = 0;
+	FVector pos = this->GetActorLocation();
+	pos.Z = 0;
+	FVector pevec = targepos - pos;
+	
+	pevec.Z = 0;
+	pevec.Normalize();
+	FVector nowvec = FVector(1.0,0.f, 0.f);
+	nowvec.Normalize();
+
+	//XY軸面角度を求める
+	float dot = FVector::DotProduct(nowvec, pevec);
+	float deg = (180.f) / PI * FMath::Acos(dot);
+	FVector cross = FVector::CrossProduct(nowvec, pevec);
+	dot = FVector::DotProduct(cross, FVector::UpVector);	
+	float angle = deg;
+	if (dot > 0.f) {
+		angle = deg;
+	}
+	else {
+		angle = 360 - deg;
+	}
+	//回転させるときの方向を求める
+	float ro = fabsf(fabsf(nowlockAngle.Y) - angle);
+	if (ro >= 180) {
+		angle += 360.0f;
+	}
+	//Yaw
+	lockontargetAngle.X = nowlockAngle.X >= 180 ? 360 : 0;	
+	lockontargetAngle.Y = angle;
+	lockontargetAngle.Z = nowlockAngle.Z >= 180 ? 360 : 0;
+	lockonflg = true;
+
+	UE_LOG(LogTemp,Log,TEXT("angle %s: nowrote%s"),*FString::SanitizeFloat(angle),*FString::SanitizeFloat(nowlockAngle.Y))
 }
 
 void APlayerBase::AddMagatama(AMagatamaBase* magatama) {
@@ -198,8 +338,15 @@ void APlayerBase::Damage(float damage, FVector force, float power)
 	if (drop >= MagatamaNum) {
 		drop = MagatamaNum;
 	}
+
+	if (drop >= hasMagatama.Num()) {
+		drop = hasMagatama.Num();
+	}
+
 	for (int i = 0; i < drop; i++) {
-		hasMagatama[0]->SetupDrop();
+		if (hasMagatama[0] != NULL) {
+			hasMagatama[0]->SetupDrop();
+		}
 		hasMagatama.RemoveAt(0);
 	}
 	MagatamaNum -= drop;
@@ -219,4 +366,17 @@ void APlayerBase::UpdateStun(float deltatime)
 		StunRecovery();
 	}
 	stunCuntTime += deltatime;
+}
+
+bool APlayerBase::GetEnemyActor(AActor** target)
+{
+	TArray<AActor*> list;
+	UGameplayStatics::GetAllActorsOfClassWithTag(this, AActor::StaticClass(), FName("Enemy"), list);
+
+	if (list.Num() == 0) {
+		UE_LOG(LogTemp, Error, TEXT("PlayerBase : No Find EnemyActor"));
+		return false;
+	}
+	*target = list[0];
+	return true;
 }
