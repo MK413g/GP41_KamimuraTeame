@@ -225,7 +225,7 @@ bool AMagatamaBase::SetupShot(FVector targetvec)
 bool AMagatamaBase::ResetWait(bool enemyhit)
 {
 	if (enemyhit) {
-		if (state == E_MagatamaState::Rote && speedRate >= 1.f) {
+		if (state == E_MagatamaState::Rote && speedRate >= RoteDamageSpeedRate) {
 			if (base != nullptr) {
 				base->DeleteMagatama(this);
 			}
