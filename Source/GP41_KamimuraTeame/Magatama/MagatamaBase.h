@@ -28,6 +28,10 @@ struct  FMagatamaState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationMaxSpeed;//rotation max speed
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationMinSpeed;//rotetion min speed
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationAcceleration;//acceleration
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotateionDamegeMax;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotateionDamegeMin;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotateionDamegeSpeed;
+
 	//Shot
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotToAngle;//to~from
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotFromAngle;//to~from
@@ -139,6 +143,9 @@ protected:
 	float minBaseSpeed;//ç≈è¨ë¨ìx
 	float RoteMaxDistance;
 	float RoteMinDistance;
+	float RoteDamageMax;
+	float RoteDamageMin;
+	float RoteDamageSpeedRate;
 	float Acceleration;//â¡ë¨ìx
 	//î≠éÀïœêî
 	float ShotInitialMaxSpeed = 0;

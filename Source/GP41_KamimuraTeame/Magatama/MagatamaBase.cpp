@@ -86,6 +86,14 @@ void AMagatamaBase::SetState(FMagatamaState stat, FPState pstate)
 	ShotToAngle = stat.ShotToAngle;
 	ShotFromAngle = stat.ShotFromAngle;
 	ShotBouns = stat.ShotBouns;
+
+	/*RoteDamageMax = RoteDamageMin = stat.MaxDamage;
+	RoteDamageSpeedRate = 1.f;*/
+
+	RoteDamageMax = stat.RotateionDamegeMax;
+	RoteDamageMin = stat.RotateionDamegeMin;
+	RoteDamageSpeedRate = stat.RotateionDamegeSpeed;
+
 }
 // Called every frame
 void AMagatamaBase::Tick(float DeltaTime)
@@ -105,9 +113,10 @@ float AMagatamaBase::GetDamage()
 	}
 
 	if (state == E_MagatamaState::Rote) {
-		if (speedRate < 1.0f) {
+		if (speedRate < RoteDamageSpeedRate) {
 			return 0;
 		}
+		float damage = RoteDamageMin * (1.f - speedRate) + RoteDamageMax * speedRate;
 	}
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
@@ -216,7 +225,7 @@ bool AMagatamaBase::SetupShot(FVector targetvec)
 bool AMagatamaBase::ResetWait(bool enemyhit)
 {
 	if (enemyhit) {
-		if (state == E_MagatamaState::Rote && speedRate >= 1.f) {
+		if (state == E_MagatamaState::Rote && speedRate >= RoteDamageSpeedRate) {
 			if (base != nullptr) {
 				base->DeleteMagatama(this);
 			}

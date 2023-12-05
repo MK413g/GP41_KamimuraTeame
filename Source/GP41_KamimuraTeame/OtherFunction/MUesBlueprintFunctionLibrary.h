@@ -16,6 +16,8 @@ class GP41_KAMIMURATEAME_API UMUesBlueprintFunctionLibrary : public UBlueprintFu
 public:
 		UFUNCTION(BlueprintCallable, BlueprintPure)
 		static float RateRangeFloat(float val, float min = 0.f, float max = 1.f);
+		UFUNCTION(BlueprintCallable, BlueprintPure)
+		static FVector RateRangeVector(float val, FVector min, FVector max);
 
 
 };
