@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include"Sound/SoundClass.h"
+#include "Sound/SoundMix.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "SoundManagerBase.generated.h"
@@ -34,7 +37,31 @@ public:
 	UFUNCTION(BlueprintCallable,meta=(AdvancedDisplay="pichmul,starttime,attenuaton,con"))
 		static void PlaySoundLocation(USoundBase* sound, ESoundManagerType type, FVector  location = FVector::ZeroVector, float volumemul = 1.f, float pichmul = 1.f, float starttime = 0.f, USoundAttenuation* attenuaton = nullptr , USoundConcurrency* con = nullptr);
 
-	// Called every frame
+	UFUNCTION(BlueprintPure)
+		static float GetBGMVoluem();	
+	UFUNCTION(BlueprintPure)
+		static float GetSEVoluem();
+	UFUNCTION(BlueprintPure)
+		static float GetALLVoluem();
+	
+	UFUNCTION(BlueprintCallable)
+		static void SetBGMVoluem(float volume = 0);
+	UFUNCTION(BlueprintCallable)
+		static void SetSEVoluem(float volume = 0);
+	UFUNCTION(BlueprintCallable)
+		static void SetALLVoluem(float volume = 0);
+
+//private:
+	static bool CheckUClass(ESoundManagerType type);
+	static bool CheckUClass();
+
+	static USoundMix* mix;
+	static USoundClass* baseclass;
+	static USoundClass* bgmclass;
+	static USoundClass* seclass;
+
+
+
 	static float VolumeAllRate;
 	static float VolumeBGMRate;
 	static float VolumeSERate;

@@ -9,7 +9,6 @@ APlayerBase::APlayerBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -18,24 +17,15 @@ void APlayerBase::BeginPlay()
 	Super::BeginPlay();
 
 
-	if (StateDataTabel == nullptr)return;
-
-	// データテーブルの読み込み
-	for (FName Key : (*StateDataTabel).GetRowNames())
-	{
-		if (Key.ToString() == LoadDataName) {
-			// 情報の保存
-			FPState* RowData = StateDataTabel->FindRow<FPState>(Key, FString());
-			InitSetState(*RowData);
-		}
-	}
+	stunflg = false;
+	stunCuntTime = 0;
 }
 
 // Called every frame
 void APlayerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	UpdateStun(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -56,6 +46,30 @@ void APlayerBase::InitSetState(FPState state)
 	Braking = state.JumpBraking;
 	MaxRadius = state.MaxRadius;
 	MinRadius = state.MinRadius;
+	JumpPower = state.JumpPower;
+	MoveSpeed = state.MoveSpeed;
+	MoveBreaking = state.MoveBraking;
+	JumpDownPower = state.JumpDownPower;
+	MoveChangeSpeed = state.MoveChangeSpeed;
+	SetInit(MoveSpeed,JumpPower,MoveBreaking,state.MoveBrakingFrictionFactor);
+}
+
+bool APlayerBase::SetDataTable()
+{
+	if (StateDataTabel == nullptr)return false;
+
+	// データテーブルの読み込み
+	for (FName Key : (*StateDataTabel).GetRowNames())
+	{
+		if (Key.ToString() == LoadDataName) {
+			// 情報の保存
+			FPState* RowData = StateDataTabel->FindRow<FPState>(Key, FString());
+			InitSetState(*RowData);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool APlayerBase::StaminaRegene(float axis)
@@ -98,8 +112,71 @@ void APlayerBase::NockBackUpdate()
 	float p = NockbackPower * 0.2f;
 	NockbackPower -= p;
 	playerpos += NockBackForce * p;
-	SetActorLocation(playerpos);
+	
+	SetActorLocation(playerpos,true);
 
+}
+
+void APlayerBase::SetStun_Implementation(float time)
+{
+	stunTime = time;
+	stunCuntTime = 0;
+	stunflg = true;
+
+	//勾玉をすべてドロップする
+	for (int i = 0; i < MagatamaNum; i++) {
+		hasMagatama[0]->SetupDrop();
+		hasMagatama.RemoveAt(0);
+	}
+	MagatamaNum = 0;
+}
+
+void APlayerBase::StunRecovery_Implementation()
+{
+	stunflg = false;
+}
+
+bool APlayerBase::CheckMoveForward(float inputvalue,float speed,float& reinput)
+{
+	if (fabsf(inputvalue) < 0.05f) {
+		return false;
+	}
+
+	if (oldinputforwardValue * inputvalue < 0) {
+		//反対方向の入力時
+		if (speed > MoveChangeSpeed) {
+			reinput = oldinputforwardValue * oldinputrate;
+			return false;
+		}
+	}
+	reinput = inputvalue;
+	oldinputforwardValue = inputvalue;
+	return true;
+}
+
+bool APlayerBase::CheckMoveRight(float inputvalue, float speed,float& reinput)
+{
+	if (fabsf(inputvalue) < 0.05f) {
+		return false;
+	}
+
+	if (oldinputrightValue * inputvalue < 0) {
+		//反対方向の入力時
+		if (speed > MoveChangeSpeed) {
+			reinput = oldinputrightValue * oldinputrate;
+			return false;
+		}
+	}
+	reinput = inputvalue;
+	oldinputrightValue = inputvalue;
+	return true;
+}
+
+void APlayerBase::HasMagatamaHidden()
+{
+	for (int i = 0; i < MagatamaNum; i++) {
+		hasMagatama[i]->SetHidden(true);
+	}
 }
 
 void APlayerBase::AddMagatama(AMagatamaBase* magatama) {
@@ -133,4 +210,13 @@ void APlayerBase::DeleteMagatama(AMagatamaBase* magatama) {
 	if (hasMagatama.Find(magatama,index)) {
 		hasMagatama.Remove(magatama);
 	}
+}
+
+void APlayerBase::UpdateStun(float deltatime)
+{
+	if (!stunflg) { return; }
+	if (stunCuntTime >= stunTime) {
+		StunRecovery();
+	}
+	stunCuntTime += deltatime;
 }

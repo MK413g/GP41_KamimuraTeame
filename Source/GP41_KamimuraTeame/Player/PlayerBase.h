@@ -19,9 +19,19 @@ struct  FPState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float Stamina;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationSpeed;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float JumpBraking;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float JumpPower;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float JumpDownPower;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveSpeed;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveBraking;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveBrakingFrictionFactor;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveChangeSpeed;
+	//UPROPERTY(EditAnyWhere, AdvancedDisplay)float MoveAcceleration;
+
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxRadius;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinRadius;
 };
+
+
 UCLASS()
 class GP41_KAMIMURATEAME_API APlayerBase : public ACharacter
 {
@@ -56,14 +66,26 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float Braking;
 	UPROPERTY(BlueprintReadWrite, Category = State)
+		float JumpPower;
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		float JumpDownPower;
+	UPROPERTY(BlueprintReadWrite, Category = State)
 		float MaxRadius;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		float MinRadius;
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		float MoveSpeed;
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		float MoveBreaking;
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		float MoveChangeSpeed;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		uint8 MagatamaNum;
 	UPROPERTY(BlueprintReadWrite, Category = State)
 		bool ShotMagatama = true;
 	
+	UPROPERTY(BlueprintReadWrite, Category = State)
+		bool stunflg;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = State)
 		UDataTable* StateDataTabel;
@@ -72,6 +94,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void InitSetState(FPState state);
+	UFUNCTION(BlueprintCallable)
+		bool SetDataTable();
 	UFUNCTION(BlueprintCallable)
 		bool StaminaRegene(float axis);
 	UFUNCTION(BlueprintCallable)
@@ -89,11 +113,32 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void SetGameOver();
 	virtual void SetGameOver_Implementation(){}
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void SetInit(float Mspeed, float Jpower,float MBreaking,float MoveBrakingFrictionFactor);
+	virtual void SetInit_Implementation(float Mspeed, float Jpower,float MBreaking,float MoveBrakingFrictionFactor){}
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void SetStun(float time);
+	virtual void SetStun_Implementation(float time);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void StunRecovery();
+	virtual void StunRecovery_Implementation();
+	UFUNCTION(BlueprintCallable)
+		bool CheckMoveForward(float inputvalue,float speed,float& reinput);
+	UFUNCTION(BlueprintCallable)
+		bool CheckMoveRight(float inputvalue,float speed,float &reinput);
+	UFUNCTION(BlueprintCallable)
+		void HasMagatamaHidden();
 
 	void AddMagatama(AMagatamaBase* magatama);
 	void Damage(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
 	void DeleteMagatama(AMagatamaBase* matagata);
+	void UpdateStun(float deltatime);
+
 private:
+	const float oldinputrate = 0.3f;
+	float oldinputforwardValue;
+	float oldinputrightValue;
+	float stunTime,stunCuntTime;
 	float NockbackPower;
 	FVector NockBackForce;
 	TArray<AMagatamaBase*> hasMagatama;
