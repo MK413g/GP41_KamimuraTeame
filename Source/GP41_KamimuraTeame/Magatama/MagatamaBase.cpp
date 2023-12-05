@@ -87,15 +87,12 @@ void AMagatamaBase::SetState(FMagatamaState stat, FPState pstate)
 	ShotFromAngle = stat.ShotFromAngle;
 	ShotBouns = stat.ShotBouns;
 
-	RoteDamageMax = RoteDamageMin = stat.MaxDamage;
-	RoteDamageSpeedRate = 1.f;
+	/*RoteDamageMax = RoteDamageMin = stat.MaxDamage;
+	RoteDamageSpeedRate = 1.f;*/
 
-	/*
 	RoteDamageMax = stat.RotateionDamegeMax;
 	RoteDamageMin = stat.RotateionDamegeMin;
 	RoteDamageSpeedRate = stat.RotateionDamegeSpeed;
-
-	*/
 
 }
 // Called every frame

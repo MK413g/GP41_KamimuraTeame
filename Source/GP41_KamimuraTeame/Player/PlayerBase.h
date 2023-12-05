@@ -16,6 +16,7 @@ struct  FPState :public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float HP;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float StaminaRegeneration;
+	UPROPERTY(EditAnyWhere, AdvancedDisplay)float StaminaWaitRegenerationTime;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float Stamina;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float RotationSpeed;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float JumpBraking;
@@ -176,6 +177,8 @@ private:
 	float oldinputrightValue;
 	float stunTime,stunCuntTime;
 	float NockbackPower;
+	float waitstaminatime;
+	float cuntwiatstaminatime;
 	FVector NockBackForce;
 	TArray<AMagatamaBase*> hasMagatama;
 };

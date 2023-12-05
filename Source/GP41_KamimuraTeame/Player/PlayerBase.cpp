@@ -23,7 +23,7 @@ void APlayerBase::BeginPlay()
 	stunCuntTime = 0;
 	runflg = false;
 	lockonflg = false;
-
+	cuntwiatstaminatime = 0;
 	//キーバインド
 	//InputComponent->BindAction("Attention", EInputEvent::IE_Pressed, this, &APlayerBase::LockOnEnemy);
 	
@@ -63,6 +63,7 @@ void APlayerBase::InitSetState(FPState state)
 	MoveChangeSpeed = state.MoveChangeSpeed;
 	MoveRunSpeed = state.RunMoveSpeed;
 	runstamina = 1;
+	waitstaminatime = state.StaminaWaitRegenerationTime;
 	SetInit(MoveSpeed,JumpPower,MoveBreaking,state.MoveBrakingFrictionFactor);
 }
 
@@ -88,11 +89,24 @@ bool APlayerBase::StaminaRegene(float axis)
 {
 	bool ret;
 	ret = axis > 0.1f && Stamina > 0.f;
-	if (axis < 0.1f&&runrate.Size()<=0.01f) {
-		Stamina += FApp::GetDeltaTime() * StaminaRegeneration;
+	if (axis < 0.1f && runrate.Size() <= 0.01f) {
+		cuntwiatstaminatime += FApp::GetDeltaTime();
+		//スタミナ待ち時間
+		if (cuntwiatstaminatime >= waitstaminatime) {
 
-		CheckVariable(StaminaMax, Stamina);
+			Stamina += FApp::GetDeltaTime() * StaminaRegeneration;
+			CheckVariable(StaminaMax, Stamina);
+		}
 	}
+
+	if (ret) {
+		Stamina -= FApp::GetDeltaTime();
+		cuntwiatstaminatime = 0;
+		if (Stamina <= 0.0f) {
+			Stamina = 0;
+		}
+	}
+
 	return ret;
 }
 
@@ -268,7 +282,7 @@ void APlayerBase::UpdateRun(float deltatime)
 	}
 
 	Stamina -= deltatime * runstamina * runrate.Size();
-
+	cuntwiatstaminatime = 0;
 }
 
 void APlayerBase::LockOnEnemy()
