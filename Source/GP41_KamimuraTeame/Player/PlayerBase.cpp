@@ -25,7 +25,7 @@ void APlayerBase::BeginPlay()
 	lockonflg = false;
 
 	//キーバインド
-	InputComponent->BindAction("Attention", EInputEvent::IE_Pressed, this, &APlayerBase::LockOnEnemy);
+	//InputComponent->BindAction("Attention", EInputEvent::IE_Pressed, this, &APlayerBase::LockOnEnemy);
 	
 }
 
@@ -215,6 +215,11 @@ void APlayerBase::SettingEndRun_Implementation()
 	runrate.X = runrate.Y = 0.f;
 }
 
+bool APlayerBase::GetRunFlg()
+{
+	return runflg;
+}
+
 void APlayerBase::LockOnUpdate(float deltatime)
 {
 	if (!lockonflg) {
@@ -316,7 +321,7 @@ void APlayerBase::LockOnEnemy()
 	lockontargetAngle.Z = nowlockAngle.Z >= 180 ? 360 : 0;
 	lockonflg = true;
 
-	UE_LOG(LogTemp,Log,TEXT("angle %s: nowrote%s"),*FString::SanitizeFloat(angle),*FString::SanitizeFloat(nowlockAngle.Y))
+	//UE_LOG(LogTemp,Log,TEXT("angle %s: nowrote%s"),*FString::SanitizeFloat(angle),*FString::SanitizeFloat(nowlockAngle.Y))
 }
 
 void APlayerBase::AddMagatama(AMagatamaBase* magatama) {

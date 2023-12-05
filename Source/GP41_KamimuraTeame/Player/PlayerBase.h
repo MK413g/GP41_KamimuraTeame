@@ -145,7 +145,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SettingEndRun();
 	void SettingEndRun_Implementation();
-
+	UFUNCTION(BlueprintPure)
+		bool GetRunFlg();
+	UFUNCTION(BlueprintCallable)
 	void LockOnEnemy();
 	
 	void AddMagatama(AMagatamaBase* magatama);
