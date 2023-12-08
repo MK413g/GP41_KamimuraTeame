@@ -5,6 +5,7 @@
 #include "Engine/DataTable.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include"../Player/PlayerBase.h"
+#include"../Manager/StageSettingManager.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -87,8 +88,8 @@ public:
 		float speedRate;	//プレイヤーの最大速度(1)の時の最大角速度の割合
 
 	//コンポーネント
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UProjectileMovementComponent* projectilemovement;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UProjectileMovementComponent* projectilemovement;
 
 	UPROPERTY(EditDefaultsOnly, Category = State)
 		UDataTable* PlayerStateDataTabel;
@@ -116,13 +117,16 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void Start();
 	virtual void Start_Implementation(){}
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void SettingFiled(E_FiledState filed);
+	void SettingFiled_Implementation(E_FiledState filed){}
 
 	//関数
 	void AngleRotation(float len);
 	void RoteUpdate(AActor* playeractor, USceneComponent* com);
 	void AngleUpRotation(USceneComponent* com);
 	void SetupDrop();
-
+	void SetFiled(E_FiledState filed);
 protected:
 	TMap<E_MagatamaState, FMagatamaDelegate> stateMap;
 	float roteangle;

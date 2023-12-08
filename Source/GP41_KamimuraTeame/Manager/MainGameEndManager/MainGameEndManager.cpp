@@ -78,4 +78,11 @@ void AMainGameEndManager::SetClearStat_Implementation()
 	gameclear = true;
 }
 
+void AMainGameEndManager::Reset()
+{
+	stat = E_MainGameEndStat::Null;
+	gameover = false;
+	gameclear = false;
+}
+
 

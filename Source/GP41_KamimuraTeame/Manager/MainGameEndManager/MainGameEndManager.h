@@ -52,8 +52,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void SetClearStat();
 	virtual void SetClearStat_Implementation();
-	
 
+	UFUNCTION(BlueprintCallable)
+		static void Reset();
 	static bool gameover;
 	static bool gameclear;
 

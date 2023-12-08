@@ -3,12 +3,14 @@
 
 #include "CreateStartMagatama.h"
 #include "Math/UnrealMathUtility.h"
+#include"MagatamaBase.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ACreateStartMagatama::ACreateStartMagatama()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
     com = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneConponent"));
     RootComponent = com;
 }
@@ -16,22 +18,25 @@ ACreateStartMagatama::ACreateStartMagatama()
 // Called when the game starts or when spawned
 void ACreateStartMagatama::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
     TArray<FVector> list;
-    GetNonOverlapVectorArray(CreateRange,31,CreateNum,list);
+    GetNonOverlapVectorArray(CreateRange, 31, CreateNum, list);
     FVector pos = GetActorLocation();
-	for (int i = 0; i < CreateNum; i++) {
-		GetWorld()->SpawnActor<AActor>(CreateActor, FTransform(FVector(pos.X+list[i].X, pos.Y+list[i].Y, CreateHeight)));
-	}
+
+    AActor* ma = UGameplayStatics::GetActorOfClass(GetWorld(), AStageSettingManager::StaticClass());
+    E_FiledState filed = E_FiledState::Normal;
+    if (ma != NULL) {
+        AStageSettingManager* m = Cast<AStageSettingManager>(ma);
+        filed = m->GetFiledData();
+    }
+
+    for (int i = 0; i < CreateNum; i++) {
+        AActor* sc = GetWorld()->SpawnActor<AActor>(CreateActor, FTransform(FVector(pos.X + list[i].X, pos.Y + list[i].Y, CreateHeight)));
+        AMagatamaBase* bas = Cast<AMagatamaBase>(sc);
+
+        bas->SetFiled(filed);
+    }
 }
-
-// Called every frame
-void ACreateStartMagatama::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
 
 
 FVector ACreateStartMagatama::GetNonOverlapVector(float maxRange, int index, float repossessionRange, const TArray<FVector>& vectorArray)

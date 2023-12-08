@@ -99,6 +99,19 @@ APawn* AStageSettingManager::CreateEnemy()
 	return ret;
 }
 
+E_FiledState AStageSettingManager::GetFiledData()
+{
+	if (state.EnemyBP != NULL) {
+		return state.Filed;
+	}
+
+	if (!GetDataTableState()) {
+		return E_FiledState::Normal;
+	}
+
+	return state.Filed;
+}
+
 void AStageSettingManager::ErrorMessege()
 {
 	UE_LOG(LogTemp, Error, TEXT("Error:AStageSetting"));

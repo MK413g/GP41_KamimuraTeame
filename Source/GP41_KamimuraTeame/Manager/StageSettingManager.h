@@ -74,7 +74,7 @@ public:
 		void BreakFiled(const FLevelState& InTarget,E_FiledState& Value);
 	UFUNCTION(BlueprintCallable)
 		APawn* CreateEnemy();
-	
+	E_FiledState GetFiledData();
 private:
 	TMap<E_LevelState, FName> stagename;
 	void ErrorMessege();
