@@ -14,6 +14,7 @@ AMainGameEndManager::AMainGameEndManager()
 	PrimaryActorTick.bCanEverTick = true;
 	gameover = false;
 	gameclear = false;
+	stat = E_MainGameEndStat::Null;
 
 }
 
