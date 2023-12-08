@@ -16,11 +16,11 @@ enum class E_LevelState :uint8
 {
 	Title=0,
 	Stage1=1,
-	Stage2=5,
-	Stage3=6,
+	Stage2=2,
+	Stage3=3,
 	Stage4=4,
-	Stage5=2,
-	End=3,
+	Stage5=5,
+	End=6,
 	//ステージを増やすとき用
 	Stage6=10 UMETA(Hidden),
 	Stage7=11 UMETA(Hidden),

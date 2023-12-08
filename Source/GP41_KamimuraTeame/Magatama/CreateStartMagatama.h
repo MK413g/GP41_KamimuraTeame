@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include"../Manager/StageSettingManager.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "CreateStartMagatama.generated.h"
@@ -22,8 +24,6 @@ protected:
 	void GetNonOverlapVectorArray(float maxRange, float repossessionRange, int requestCount, TArray<FVector>& OutVecArray);
 	USceneComponent* com;
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<AActor> CreateActor;
 	UPROPERTY(EditAnywhere)
@@ -32,4 +32,6 @@ public:
 		float CreateHeight=0;
 	UPROPERTY(EditAnywhere)
 		float CreateRange=0;
+	UPROPERTY(EditAnywhere)
+		TMap<E_FiledState, TSubclassOf<UClass>> fildmap;
 };

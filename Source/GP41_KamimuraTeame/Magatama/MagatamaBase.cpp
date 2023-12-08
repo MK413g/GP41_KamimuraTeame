@@ -178,6 +178,11 @@ void AMagatamaBase::SetupDrop() {
 	}
 }
 
+void AMagatamaBase::SetFiled(E_FiledState filed)
+{
+	SettingFiled(filed);
+}
+
 bool AMagatamaBase::SetupPlayerUse(FVector PlayerPos, USceneComponent* com)
 {
 	if (state!=E_MagatamaState::Wait) { return false; }
