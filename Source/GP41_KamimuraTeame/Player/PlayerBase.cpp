@@ -36,6 +36,7 @@ void APlayerBase::Tick(float DeltaTime)
 	UpdateStun(DeltaTime);
 	LockOnUpdate(DeltaTime);
 	UpdateRun(DeltaTime);
+	NockBackUpdate();
 }
 
 // Called to bind functionality to input
