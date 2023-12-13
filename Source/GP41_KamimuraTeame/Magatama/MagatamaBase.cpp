@@ -330,6 +330,26 @@ void AMagatamaBase::AngleUpRotation(USceneComponent* com)
 	center.SetRotation(rote.Quaternion());
 }
 
+bool AMagatamaBase::GetHitEffect()
+{
+	switch (state)
+	{
+	case E_MagatamaState::Wait:
+	case E_MagatamaState::Null:
+		return false;
+
+	case E_MagatamaState::Shot:
+	case E_MagatamaState::Drop:
+		return true;
+
+	case E_MagatamaState::Rote:
+		return speedRate >= RoteDamageSpeedRate;
+
+	default:
+		return false;
+	}
+}
+
 void AMagatamaBase::AngleRotation(float len)
 {
 	//‰ñ“]ˆ—

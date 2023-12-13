@@ -121,6 +121,9 @@ public:
 		void SettingFiled(E_FiledState filed);
 	void SettingFiled_Implementation(E_FiledState filed){}
 
+	UFUNCTION(BlueprintPure)
+		bool GetHitEffect();
+
 	//ä÷êî
 	void AngleRotation(float len);
 	void RoteUpdate(AActor* playeractor, USceneComponent* com);
