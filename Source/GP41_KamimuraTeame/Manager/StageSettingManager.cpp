@@ -47,6 +47,11 @@ bool AStageSettingManager::GetDataTableState()
 		return false;
 	}
 
+	//既に読み込み済みかどうか
+	if (state.EnemyBP != NULL) {
+		return true;
+	}
+
 	//ゲームインスタンス所得
 	UGameStageInstance* instance = UGameStageInstance::GetInstance();
 	int levelstat = (int)instance->GetLevelState();
@@ -104,8 +109,8 @@ E_FiledState AStageSettingManager::GetFiledData()
 	if (state.EnemyBP != NULL) {
 		return state.Filed;
 	}
-
-	if (!GetDataTableState()) {
+	GetDataTableState();
+	if (state.EnemyBP == NULL) {
 		return E_FiledState::Normal;
 	}
 
