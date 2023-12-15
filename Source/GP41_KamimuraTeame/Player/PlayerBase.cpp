@@ -339,6 +339,33 @@ void APlayerBase::LockOnEnemy()
 	//UE_LOG(LogTemp,Log,TEXT("angle %s: nowrote%s"),*FString::SanitizeFloat(angle),*FString::SanitizeFloat(nowlockAngle.Y))
 }
 
+void APlayerBase::ChangeFiled(E_FiledState filed)
+{
+
+	TMap<E_FiledState, FString> map;
+	map.Add(E_FiledState::Normal, "NormalState");
+	map.Add(E_FiledState::Fire, "FireFiledState");
+	map.Add(E_FiledState::Ice, "IceFiledState");
+	map.Add(E_FiledState::Thunder, "ThunderFiledState");
+	map.Add(E_FiledState::Water, "WaterFiledState");
+
+	if (StateDataTabel == nullptr)return;
+
+	// データテーブルの読み込み
+	for (FName Key : (*StateDataTabel).GetRowNames())
+	{
+		if (Key.ToString() == map[filed]) {
+			// 情報の保存
+			FPState* RowData = StateDataTabel->FindRow<FPState>(Key, FString());
+			InitSetState(*RowData);
+			break;
+		}
+	}
+
+	ChangeMagatama(filed);
+
+}
+
 void APlayerBase::AddMagatama(AMagatamaBase* magatama) {
 	hasMagatama.Add(magatama);
 }

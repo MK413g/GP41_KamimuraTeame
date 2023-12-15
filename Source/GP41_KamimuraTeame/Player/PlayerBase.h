@@ -150,6 +150,11 @@ public:
 		bool GetRunFlg();
 	UFUNCTION(BlueprintCallable)
 	void LockOnEnemy();
+	UFUNCTION(BlueprintCallable)
+	void ChangeFiled(E_FiledState filed);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void ChangeMagatama(E_FiledState filed);
+	void ChangeMagatama_Implementation(E_FiledState filed){}
 	
 	void AddMagatama(AMagatamaBase* magatama);
 	void Damage(float damage, FVector force = FVector::ZeroVector, float power = 0.f);
