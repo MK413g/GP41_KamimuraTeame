@@ -150,6 +150,8 @@ void APlayerBase::SetStun_Implementation(float time)
 	stunCuntTime = 0;
 	stunflg = true;
 
+	MagatamaNum = hasMagatama.Num();
+
 	//Œù‹Ê‚ğ‚·‚×‚Äƒhƒƒbƒv‚·‚é
 	for (int i = 0; i < MagatamaNum; i++) {
 		if (hasMagatama[0] != NULL) {
