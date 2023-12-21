@@ -8,6 +8,8 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 
+#define OUT
+
 // Sets default values
 AMagatamaBase::AMagatamaBase()
 {
@@ -16,7 +18,7 @@ AMagatamaBase::AMagatamaBase()
 	state = E_MagatamaState::Wait;
 	
 	projectilemovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-
+	
 	AddStateMap(this, E_MagatamaState::Rote, &AMagatamaBase::RoteUpdate);
 }
 	
@@ -99,7 +101,7 @@ void AMagatamaBase::SetState(FMagatamaState stat, FPState pstate)
 void AMagatamaBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (playerheight<GetActorLocation().Z) {
+	if (playerheight/2.f<GetActorLocation().Z) {
 		projectilemovement->ProjectileGravityScale = 2.f;
 	}
 }
@@ -117,6 +119,7 @@ float AMagatamaBase::GetDamage()
 			return 0;
 		}
 		float damage = RoteDamageMin * (1.f - speedRate) + RoteDamageMax * speedRate;
+		return damage;
 	}
 
 	float max = minBaseSpeed * (1.0f - speedRate) + maxBaseSpeed * speedRate;
@@ -218,6 +221,7 @@ bool AMagatamaBase::SetupShot(FVector targetvec)
 	shotvec = targetvec * shotspeed;
 	projectilemovement->InitialSpeed = shotspeed;
 	projectilemovement->Velocity = shotvec;
+	projectilemovement->ProjectileGravityScale = ShotGravity*0.5f;
 	shotboounscount = 0;
 
 	if (base) {
@@ -255,7 +259,7 @@ bool AMagatamaBase::ResetWait(bool enemyhit)
 	if (state != E_MagatamaState::Shot&&state!=E_MagatamaState::Drop) { return false; }
 	shotboounscount++;
 	if (shotboounscount < ShotBouns + 1 ) { return false; }
-	if (playerheight < GetActorLocation().Z) { return false; }
+	if (playerheight/2.f < GetActorLocation().Z) { return false; }
 
 	state = E_MagatamaState::Wait;
 	projectilemovement->SetComponentTickEnabled(false);
@@ -270,6 +274,14 @@ bool AMagatamaBase::GetShotAngle(AActor* player)const
 
 	FVector playervec = player->GetActorForwardVector();
 	playervec.Normalize();
+
+	FHitResult Hit;
+	//レイを飛ばし間に障害物がある場合は飛ばせなくする
+	GetWorld()->LineTraceSingleByObjectType(OUT Hit, player->GetActorLocation(), this->GetActorLocation(), FCollisionObjectQueryParams(ECollisionChannel::ECC_WorldStatic));
+	if (Hit.GetActor()) {
+		return false;
+	}
+
 
 	FVector myvec = GetActorLocation() - player->GetActorLocation();
 	myvec.Normalize();
@@ -348,6 +360,32 @@ bool AMagatamaBase::GetHitEffect()
 	default:
 		return false;
 	}
+}
+
+void AMagatamaBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector HitNoraml, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (OtherActor->ActorHasTag("Player")) {
+		return;
+	}
+	
+	HitNoraml.Normalize();
+	FVector vec=projectilemovement->Velocity;
+	float pow = projectilemovement->Velocity.Size();
+	pow *= FMath::RandRange(0.8f, 1.f);
+	pow *= FMath::RandRange(0.9f, 1.f);
+
+	vec.Normalize();
+
+	//ランダム反射の加えるベクトルを求める
+	FVector force = vec + FQuat(HitNoraml, FMath::DegreesToRadians(FMath::RandRange(0.f, 360.f))).Vector();
+	
+	if (fabs(force.Z) <= 0.01f) {
+		force.Z = FMath::RandRange(0.01f, 0.05f);
+	}
+	force.Normalize();
+	projectilemovement->Velocity = force*pow;
+	projectilemovement->ProjectileGravityScale = ShotGravity;
+
 }
 
 void AMagatamaBase::AngleRotation(float len)
