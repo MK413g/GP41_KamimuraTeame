@@ -377,12 +377,16 @@ void AMagatamaBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	vec.Normalize();
 
 	//ランダム反射の加えるベクトルを求める
-	FVector force = vec + FQuat(HitNoraml, FMath::DegreesToRadians(FMath::RandRange(0.f, 360.f))).Vector();
+	FVector v = vec * HitNoraml;
+	v.Normalize();
+	FVector force = vec + FQuat(v, FMath::DegreesToRadians(FMath::RandRange(0.f, 360.f))).Vector();
 	
 	if (fabs(force.Z) <= 0.01f) {
 		force.Z = FMath::RandRange(0.01f, 0.05f);
 	}
+
 	force.Normalize();
+
 	projectilemovement->Velocity = force*pow;
 	projectilemovement->ProjectileGravityScale = ShotGravity;
 
