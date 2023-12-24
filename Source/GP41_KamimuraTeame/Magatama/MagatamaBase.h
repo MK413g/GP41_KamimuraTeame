@@ -123,6 +123,8 @@ public:
 
 	UFUNCTION(BlueprintPure)
 		bool GetHitEffect();
+	UFUNCTION(BlueprintCallable)
+		void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,FVector HitNoraml, FVector NormalImpulse, const FHitResult& Hit);
 
 	//ä÷êî
 	void AngleRotation(float len);
