@@ -24,6 +24,9 @@ void UGameStageInstance::StageInit()
 void UGameStageInstance::SetStageState(E_LevelState state)
 {
 	m_state = state;
+	if (state != E_LevelState::Title) {
+		m_tutorialflg = true;
+	}
 }
 
 bool UGameStageInstance::SetNextStage()
@@ -45,4 +48,14 @@ E_LevelState UGameStageInstance::GetLevelState()
 void UGameStageInstance::StageEnumOutput(E_LevelState nowstate, E_LevelState& EnumOutput)
 {
 	EnumOutput = nowstate;
+}
+
+bool UGameStageInstance::GetTutorialSkipFlg()
+{
+	return m_tutorialflg;
+}
+
+void UGameStageInstance::SetTutorialSkipFlg()
+{
+	m_tutorialflg = true;
 }

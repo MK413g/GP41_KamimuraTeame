@@ -46,6 +46,11 @@ public:
 	E_LevelState GetLevelState();
 	UFUNCTION(BlueprintCallable, meta = (ExpandEnumAsExecs = "EnumOutput"))
 		void StageEnumOutput(E_LevelState nowstate, E_LevelState& EnumOutput);
+	UFUNCTION(BlueprintPure)
+		bool GetTutorialSkipFlg();
+	UFUNCTION(BlueprintCallable)
+		void SetTutorialSkipFlg();
 private:
 	E_LevelState m_state=E_LevelState::Null;
+	bool m_tutorialflg = false;
 };
