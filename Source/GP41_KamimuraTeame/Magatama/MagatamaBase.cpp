@@ -10,6 +10,8 @@
 
 #define OUT
 
+bool AMagatamaBase::HitStopFlg = false;
+
 // Sets default values
 AMagatamaBase::AMagatamaBase()
 {
@@ -27,7 +29,7 @@ void AMagatamaBase::BeginPlay()
 {
 	Super::BeginPlay();
 	EnableInput(GetWorld()->GetFirstPlayerController());
-
+	HitStopFlg = false;
 	//Player‚ðŽæ“¾‚µ‚Ä‚¨‚­
 	APawn* p = UGameplayStatics::GetPlayerPawn(this->GetWorld(), 0);
 	if (p) {
@@ -74,6 +76,8 @@ void AMagatamaBase::SetState(FMagatamaState stat, FPState pstate)
 {
 	RoteMaxDistance = pstate.MaxRadius;
 	RoteMinDistance = pstate.MinRadius;
+	HitStopTimeDilation = stat.HitStopTimeDilation;
+	HitStopTime = stat.HitStopTime;
 
 	MaxDamage = stat.MaxDamage;
 	MinDamage = stat.MinDamage;
@@ -126,6 +130,16 @@ float AMagatamaBase::GetDamage()
 	float d = MinDamage * (1.f - speedRate) + MaxDamage * speedRate;
 	//UE_LOG(LogTemp, Log, TEXT("Damage:%s"), *FString::SanitizeFloat(d));
 	return d;
+}
+
+float AMagatamaBase::GetHitStopTime()
+{
+	return HitStopTime;
+}
+
+float AMagatamaBase::GetHitStopTimeDilation()
+{
+	return HitStopTimeDilation;
 }
 
 FVector AMagatamaBase::GetNockBackForce()  
@@ -390,6 +404,16 @@ void AMagatamaBase::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	projectilemovement->Velocity = force*pow;
 	projectilemovement->ProjectileGravityScale = ShotGravity;
 
+}
+
+bool AMagatamaBase::GetHitStopFlg()
+{
+	return HitStopFlg;
+}
+
+void AMagatamaBase::SetHitStopFlg(bool set)
+{
+	HitStopFlg = set;
 }
 
 void AMagatamaBase::AngleRotation(float len)

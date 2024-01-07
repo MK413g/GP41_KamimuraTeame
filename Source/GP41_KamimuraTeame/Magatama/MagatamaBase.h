@@ -21,6 +21,8 @@ struct  FMagatamaState :public FTableRowBase
 	//Damage
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxDamage;//shot max damage
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinDamage;//shot min damage 
+	UPROPERTY(EditAnyWhere, AdvancedDisplay,meta=(ClampMin = "0.01", ClampMax = "1.0", UIMix="0.01",UIMax="1.0"))float HitStopTimeDilation;//hitStop
+	UPROPERTY(EditAnyWhere, AdvancedDisplay,meta=(ClampMin = "0.01", ClampMax = "1.0", UIMix="0.01",UIMax="1.0"))float HitStopTime;//hitStop
 
 //	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MinKnockBackPower;
 //	UPROPERTY(EditAnyWhere, AdvancedDisplay)float MaxKnockBackPower;
@@ -40,6 +42,8 @@ struct  FMagatamaState :public FTableRowBase
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotInitialMinSpeed;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)float ShotGravity;
 	UPROPERTY(EditAnyWhere, AdvancedDisplay)uint8 ShotBouns;
+
+
 };
 
 
@@ -110,6 +114,10 @@ public:
 	UFUNCTION(BlueprintPure)
 		float GetDamage();
 	UFUNCTION(BlueprintPure)
+		float GetHitStopTime();
+	UFUNCTION(BlueprintPure)
+		float GetHitStopTimeDilation();
+	UFUNCTION(BlueprintPure)
 		FVector GetNockBackForce();
 	UFUNCTION(BlueprintCallable)
 		void SetState(FMagatamaState stat, FPState pstate);
@@ -125,7 +133,11 @@ public:
 		bool GetHitEffect();
 	UFUNCTION(BlueprintCallable)
 		void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,FVector HitNoraml, FVector NormalImpulse, const FHitResult& Hit);
-
+	UFUNCTION(BlueprintPure)
+		static bool GetHitStopFlg();
+	UFUNCTION(BlueprintCallable)
+		static void SetHitStopFlg(bool set);
+	static bool HitStopFlg;
 	//ä÷êî
 	void AngleRotation(float len);
 	void RoteUpdate(AActor* playeractor, USceneComponent* com);
@@ -147,6 +159,8 @@ protected:
 	float MinDamage = 10.f;
 	float MinKnockBackPower = 100;
 	float MaxKnockBackPower = 300;
+	float HitStopTime=10.f;
+	float HitStopTimeDilation=0.1f;
 	//ë¨ìxïœêî
 	float maxBaseSpeed;//ç≈ëÂë¨ìx
 	float minBaseSpeed;//ç≈è¨ë¨ìx
