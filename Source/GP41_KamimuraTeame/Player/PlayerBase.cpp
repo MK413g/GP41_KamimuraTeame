@@ -23,6 +23,7 @@ void APlayerBase::BeginPlay()
 	stunCuntTime = 0;
 	runflg = false;
 	lockonflg = false;
+	oninput = false;
 	cuntwiatstaminatime = 0;
 	//キーバインド
 	//InputComponent->BindAction("Attention", EInputEvent::IE_Pressed, this, &APlayerBase::LockOnEnemy);
@@ -90,14 +91,24 @@ bool APlayerBase::StaminaRegene(float axis)
 {
 	bool ret;
 	ret = axis > 0.1f && Stamina > 0.f;
-	if (axis < 0.1f && runrate.Size() <= 0.01f) {
+	if (oninput) {
+		ret = false;
+	}
+	if ((axis < 0.1f && runrate.Size() <= 0.01f)||oninput) {
 		cuntwiatstaminatime += FApp::GetDeltaTime();
 		//スタミナ待ち時間
 		if (cuntwiatstaminatime >= waitstaminatime) {
-
 			Stamina += FApp::GetDeltaTime() * StaminaRegeneration;
 			CheckVariable(StaminaMax, Stamina);
+			if (StaminaMax == Stamina) {
+				oninput = false;
+				if (runflg)SettingStartRun();
+			}
 		}
+	}
+
+	if (oninput &&axis <= 0.01f&& !runflg) {
+		oninput = false;
 	}
 
 	if (ret) {
@@ -105,6 +116,7 @@ bool APlayerBase::StaminaRegene(float axis)
 		cuntwiatstaminatime = 0;
 		if (Stamina <= 0.0f) {
 			Stamina = 0;
+			oninput = true;
 		}
 	}
 
@@ -223,12 +235,16 @@ void APlayerBase::HasMagatamaHidden()
 
 void APlayerBase::SettingStartRun_Implementation()
 {
+	if (oninput) {
+		return;
+	}
 	runflg = true;
 }
 
 void APlayerBase::SettingEndRun_Implementation()
 {
 	runflg = false;
+	oninput = false;
 	runrate.X = runrate.Y = 0.f;
 }
 
@@ -277,10 +293,13 @@ void APlayerBase::UpdateRun(float deltatime)
 		return;
 	}
 
+	if (oninput)return;
+
 	if (Stamina <= 0.f) {
 		Stamina = 0;
 		SettingEndRun();
 		runflg = true;
+		oninput = true;
 		return;
 	}
 

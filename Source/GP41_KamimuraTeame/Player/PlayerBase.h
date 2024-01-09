@@ -176,6 +176,7 @@ private:
 	float runstamina;
 	FVector2D runrate;
 	bool runflg;
+	bool oninput;
 
 	const float oldinputrate = 0.3f;
 	float oldinputforwardValue;

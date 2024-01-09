@@ -135,7 +135,7 @@ void ASoundManagerBase::SetSEVoluem(float volume)
 			VolumeSERate = volume;
 			UWorld* World = GEngine->GameViewport->GetWorld();
 			FAudioDevice* device = World->GetAudioDeviceRaw();
-			device->SetSoundMixClassOverride(mix, bgmclass, VolumeSERate, 1, 0, true);
+			device->SetSoundMixClassOverride(mix, seclass, VolumeSERate, 1, 0, true);
 		}
 	}
 }
