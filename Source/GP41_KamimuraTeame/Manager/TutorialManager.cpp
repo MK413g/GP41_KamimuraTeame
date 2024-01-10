@@ -10,21 +10,24 @@ ATutorialManager::ATutorialManager()
 	PrimaryActorTick.bCanEverTick = true;
 	framebflg = true;
 	type = E_TutorialType::FirstWait;
+	nowtype = E_TutorialType::FirstWait;
 }
 
 // Called when the game starts or when spawned
 void ATutorialManager::BeginPlay()
 {
 	Super::BeginPlay();
+	type = E_TutorialType::FirstWait;
+	nowtype = E_TutorialType::FirstWait;
 	
 }
 
 void ATutorialManager::NextType(E_TutorialType intype)
 {
-	if (intype == type) {
+	if (intype == type&&nowtype==type) {
 		if (GetNextTutorial()&&framebflg) {
 			framebflg = false;
-			type = (E_TutorialType)((int)type + 1);
+  			type = (E_TutorialType)((int)type + 1);
 			UpdateWidget(type);
 		}
 	}
@@ -32,9 +35,9 @@ void ATutorialManager::NextType(E_TutorialType intype)
 
 bool ATutorialManager::GetActionTutorial(E_TutorialType actiontype)
 {
-	if ((int)actiontype == (int)type) {
+	if ((int)actiontype == (int)type&&type==nowtype) {
 	
-		if (GetNext()) {
+ 		if (GetNext()) {
 			return false;
 		}
 
@@ -65,4 +68,12 @@ E_TutorialType ATutorialManager::GetTutorialType()
 void ATutorialManager::NextFlg()
 {
 	framebflg = true;
+}
+
+void ATutorialManager::NextTypeFlg(E_TutorialType now)
+{
+	if (now == nowtype) {
+		type = (E_TutorialType)((int)type+1);
+	}
+	nowtype = type;
 }

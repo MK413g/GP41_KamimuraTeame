@@ -36,6 +36,13 @@ void ASoundManagerBase::BeginPlay()
 	bgmclass = nullptr;
 	seclass = nullptr;
 
+	float r = VolumeSERate;
+	VolumeSERate = r + 1;
+	SetSEVoluem(r);
+
+	r = VolumeBGMRate;
+	VolumeBGMRate = r + 1;
+	SetBGMVoluem(r);
 }
 
 bool ASoundManagerBase::CheckSetting(USoundBase* sound)

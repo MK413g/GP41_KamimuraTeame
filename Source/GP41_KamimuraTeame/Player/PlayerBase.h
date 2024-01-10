@@ -185,6 +185,7 @@ private:
 	float NockbackPower;
 	float waitstaminatime;
 	float cuntwiatstaminatime;
+	float startheight;
 	FVector NockBackForce;
 	TArray<AMagatamaBase*> hasMagatama;
 };

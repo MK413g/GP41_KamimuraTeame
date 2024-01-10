@@ -25,6 +25,7 @@ void APlayerBase::BeginPlay()
 	lockonflg = false;
 	oninput = false;
 	cuntwiatstaminatime = 0;
+	startheight = GetActorLocation().Z;
 	//キーバインド
 	//InputComponent->BindAction("Attention", EInputEvent::IE_Pressed, this, &APlayerBase::LockOnEnemy);
 	
@@ -238,6 +239,9 @@ void APlayerBase::SettingStartRun_Implementation()
 	if (oninput) {
 		return;
 	}
+	if (GetActorLocation().Z >= startheight + 0.1f) {
+		return;
+	}
 	runflg = true;
 }
 
@@ -393,7 +397,7 @@ void APlayerBase::AddMagatama(AMagatamaBase* magatama) {
 
 void APlayerBase::Damage(float damage, FVector force, float power)
 {
-	Hp -= damage;
+	Hp -= abs(damage);
 	if (Hp < 0)Hp = 0;
 	SetNockBack(force, power);
 

@@ -11,6 +11,9 @@ UENUM(BlueprintType)
 enum class E_TutorialType : uint8
 {
 	FirstWait			= 0			UMETA(ToolTip = "最初のナレーション待ち時間"),
+	PlayerState			= 12		UMETA(ToolTip = "プレイヤーのステータス"),
+	EnemyState			= 13		UMETA(ToolTip = "敵のステータス"),
+	MiniMap				= 14		UMETA(ToolTip = "ミニマップ"),
 	Move				= 1			UMETA(ToolTip = "移動"),
 	RunMove				= 2			UMETA(ToolTip = "ダッシュ"),
 	Junp				= 3			UMETA(ToolTip = "ジャンプ"),
@@ -66,9 +69,12 @@ protected:
 	void UpdateTutorial_Implementation(){}
 	UFUNCTION(BlueprintCallable)
 		void NextFlg();
+	UFUNCTION(BlueprintCallable)
+		void NextTypeFlg(E_TutorialType now);
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		bool GetNext();
 public:	
 	E_TutorialType type;
+	E_TutorialType nowtype;
 	bool framebflg;
 };
