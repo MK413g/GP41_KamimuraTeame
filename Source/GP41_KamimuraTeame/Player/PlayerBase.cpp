@@ -375,6 +375,8 @@ void APlayerBase::ChangeFiled(E_FiledState filed)
 	map.Add(E_FiledState::Thunder, "ThunderFiledState");
 	map.Add(E_FiledState::Water, "WaterFiledState");
 
+	float h = Hp;
+	float s = Stamina;
 	if (StateDataTabel == nullptr)return;
 
 	// データテーブルの読み込み
@@ -389,6 +391,9 @@ void APlayerBase::ChangeFiled(E_FiledState filed)
 	}
 
 	ChangeMagatama(filed);
+
+	Hp = h;
+	Stamina = s;
 
 }
 
