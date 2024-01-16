@@ -159,6 +159,10 @@ void APlayerBase::NockBackUpdate()
 
 void APlayerBase::SetStun_Implementation(float time)
 {
+	if (GetActorLocation().Z >= startheight + 0.1f) {
+		return;
+	}
+
 	stunTime = time;
 	stunCuntTime = 0;
 	stunflg = true;
@@ -237,9 +241,6 @@ void APlayerBase::HasMagatamaHidden()
 void APlayerBase::SettingStartRun_Implementation()
 {
 	if (oninput) {
-		return;
-	}
-	if (GetActorLocation().Z >= startheight + 0.1f) {
 		return;
 	}
 	runflg = true;
