@@ -160,6 +160,7 @@ void APlayerBase::NockBackUpdate()
 void APlayerBase::SetStun_Implementation(float time)
 {
 	if (GetActorLocation().Z >= startheight + 0.1f) {
+		stunflg = true;
 		return;
 	}
 
